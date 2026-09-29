@@ -16,6 +16,12 @@ REPORTS_DIR = ROOT / "reports"
 
 
 def app_token() -> str | None:
-    """Token de Socrata desde .env o variables de entorno (None si no hay)."""
+    """ID de la clau API de Socrata desde .env o variables de entorno (None si no hay)."""
     load_dotenv(ROOT / ".env")
     return os.getenv("SODA_APP_TOKEN") or None
+
+
+def app_secret() -> str | None:
+    """Clau secreta de Socrata desde .env o variables de entorno (None si no hay)."""
+    load_dotenv(ROOT / ".env")
+    return os.getenv("SODA_APP_SECRET") or None

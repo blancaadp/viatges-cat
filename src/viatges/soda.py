@@ -18,6 +18,7 @@ class SodaClient:
         self,
         domain: str,
         app_token: str | None = None,
+        app_secret: str | None = None,
         *,
         timeout: float = 30.0,
         max_retries: int = 4,
@@ -25,11 +26,17 @@ class SodaClient:
         transport: httpx.BaseTransport | None = None,
     ) -> None:
         headers = {"Accept": "application/json"}
-        if app_token:
+        auth: tuple[str, str] | None = None
+        if app_token and app_secret:
+            # Clau API nueva (ID + Secreto): requiere autenticación Basic.
+            auth = (app_token, app_secret)
+        elif app_token:
+            # Token antiguo de un solo valor.
             headers["X-App-Token"] = app_token
         self._client = httpx.Client(
             base_url=f"https://{domain}",
             headers=headers,
+            auth=auth,
             timeout=timeout,
             transport=transport,
         )

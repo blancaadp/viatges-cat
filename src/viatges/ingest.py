@@ -32,7 +32,7 @@ def run_ingest(client: SodaClient | None = None, raw_dir: Path = config.RAW_DIR)
     snapshot_dir.mkdir(parents=True, exist_ok=False)
 
     owns_client = client is None
-    client = client or SodaClient(config.DOMAIN, config.app_token())
+    client = client or SodaClient(config.DOMAIN, config.app_token(), config.app_secret())
     try:
         metadata = client.metadata(config.DATASET_ID)
         rows = client.fetch_all(config.DATASET_ID)
