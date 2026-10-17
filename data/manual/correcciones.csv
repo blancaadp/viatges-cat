@@ -3,3 +3,17 @@ racc-438,destinacio,Tòquio (Japó) / Himeji (Japó),Dos destinos separados por 
 racc-57,destinacio,Andorra la Vella (Andorra),El campo contiene la institución visitada además de la ciudad,El propio registro
 raccERGO-2034,destinacio,Buenos Aires (Argentina),Tramo repetido pegado al anterior con un país incoherente (Buenos Aires · Uruguai),El propio registro
 raccERGO-2092,destinacio,Timişoara (Romania),Tramo repetido pegado al anterior con un país incoherente (Timişoara · Suècia),El propio registro
+racc-1036,revisio_duplicat_de,racc-1053,"Mismo viaje publicado dos veces; solo cambia altres_despeses (120,60 vs 160,60). Se conserva el más reciente como versión corregida",Revisión manual 2026-10-17
+racc-1735,revisio_duplicat_de,raccERGO-2037,"Mismo viaje publicado dos veces; diferencia de 0,50 € en altres_despeses. Se conserva el más reciente",Revisión manual 2026-10-17
+racc-689,revisio_duplicat_de,racc-787,Mismo viaje y comitiva con todos los importes a 0; racc-787 tiene los costes,Revisión manual 2026-10-17
+raccERGO-2039,revisio_duplicat_de,raccERGO-2061,"Solo recoge los taxis (72,60 €), ya incluidos en raccERGO-2061",Revisión manual 2026-10-17
+raccERGO-2095,revisio_duplicat_de,raccERGO-2128,Mismo viaje publicado dos veces con importes casi idénticos. Se conserva el más reciente,Revisión manual 2026-10-17
+racc-757,revisio_desdoblament,complementari,Bruselas y Ginebra son tramos consecutivos del mismo desplazamiento,Revisión manual 2026-10-17
+racc-758,revisio_desdoblament,complementari,Bruselas y Ginebra son tramos consecutivos del mismo desplazamiento,Revisión manual 2026-10-17
+racc-876,revisio_desdoblament,complementari,Perpinyà y Toulouse son tramos consecutivos del mismo desplazamiento,Revisión manual 2026-10-17
+racc-877,revisio_desdoblament,complementari,Perpinyà y Toulouse son tramos consecutivos del mismo desplazamiento,Revisión manual 2026-10-17
+racc-72,revisio_desdoblament,independent,Manchester (conferencia Polis) y Bruselas (comitiva del secretario) son viajes distintos,Revisión manual 2026-10-17
+racc-80,revisio_desdoblament,independent,Manchester (conferencia Polis) y Bruselas (comitiva del secretario) son viajes distintos,Revisión manual 2026-10-17
+racc-1098,revisio_duplicat_de,racc-904,"Se cuenta el coste total del viaje (racc-904, incluye la parte pagada por el INAP); los 140,40 € de racc-1098 son la parte pagada por la EAPC, ya detallada en las observaciones de racc-904",Revisión manual 2026-10-17
+raccERGO-2047,revisio_desdoblament,pendent,"Dos habitaciones (827 € ≈ 2×413) y el mismo transporte que raccERGO-2068 con otra comitiva. Verificar con el Departamento",Revisión manual 2026-10-17
+raccERGO-2068,revisio_desdoblament,pendent,"Dos habitaciones (827 € ≈ 2×413) y el mismo transporte que raccERGO-2047 con otra comitiva. Verificar con el Departamento",Revisión manual 2026-10-17

@@ -234,3 +234,40 @@ def test_run_clean_escribe_salidas(snapshot_dir, manual, tmp_path, monkeypatch):
     assert (out / "viatges.csv").exists()
     assert (out / "trams.csv").exists()
     assert "# Fase 1" in (tmp_path / "reports" / "fase1_neteja.md").read_text(encoding="utf-8")
+
+
+def test_mark_duplicates_respeta_la_revision_manual():
+    df = pd.DataFrame(
+        {
+            "id": ["racc-1036", "racc-1053", "racc-72", "racc-80", "racc-757", "racc-758",
+                   "e-1", "e-2"],
+            "nom": ["Carme P"] * 2 + ["Javier F"] * 2 + ["Gerard F"] * 2 + ["Elisabet C"] * 2,
+            "data_inici_clean": ["2023-11-13"] * 2 + ["2018-11-22"] * 2 + ["2022-09-28"] * 2
+            + ["2026-05-19"] * 2,
+            "total_clean": [684.92, 724.92, 902.09, 183.39, 601.96, 923.17, 1657.8, 1371.03],
+            "revisio_duplicat_de": ["racc-1053"] + [pd.NA] * 7,
+            "revisio_desdoblament": [pd.NA, pd.NA, "independent", "independent",
+                                     "complementari", "complementari", "pendent", "pendent"],
+        }
+    )  # fmt: skip
+    out = mark_duplicates(df).set_index("id")
+    # duplicado manual: se conserva el más reciente, que pasa a encabezar el grupo
+    assert out.loc["racc-1036", "flag_duplicat"]
+    assert out.loc["racc-1036", "duplicat_de"] == "racc-1053"
+    assert set(out.loc[["racc-1036", "racc-1053"], "grup_viatge"]) == {"racc-1053"}
+    # independientes: cada uno su grupo
+    assert out.loc["racc-80", "grup_viatge"] == "racc-80"
+    # complementarios: un grupo y resuelto
+    assert set(out.loc[["racc-757", "racc-758"], "grup_viatge"]) == {"racc-757"}
+    assert not out.loc[["racc-72", "racc-757", "racc-1053"], "flag_possible_desdoblament"].any()
+    # pendiente: sigue marcado
+    assert out.loc[["e-1", "e-2"], "flag_possible_desdoblament"].all()
+
+
+def test_mark_duplicates_rechaza_decisiones_desconocidas():
+    df = pd.DataFrame(
+        {"id": ["a"], "nom": ["X"], "data_inici_clean": ["2020-01-01"], "total_clean": [1.0],
+         "revisio_desdoblament": ["quizas"]}
+    )  # fmt: skip
+    with pytest.raises(ValueError, match="quizas"):
+        mark_duplicates(df)

@@ -34,6 +34,10 @@ MAX_PLAUSIBLE_DAYS = 21
 TEXT_COLUMNS = ["observacions", "comitiva", "altres_despeses_detall", "agenda"]
 HOME_COUNTRY = "ES"
 
+# Campos de revisión manual: no existen en el dataset, los crea `correcciones.csv`
+REVIEW_FIELDS = ["revisio_duplicat_de", "revisio_desdoblament"]
+SPLIT_DECISIONS = {"complementari", "independent", "pendent"}
+
 # ---------------------------------------------------------------------------
 # Diccionarios manuales
 # ---------------------------------------------------------------------------
@@ -73,6 +77,8 @@ def apply_corrections(df: pd.DataFrame, corrections: pd.DataFrame) -> pd.DataFra
     """Sustituye valores puntuales y deja constancia en la columna `correccions`."""
     out = df.copy()
     out["correccions"] = ""
+    for field in REVIEW_FIELDS:
+        out[field] = pd.Series(pd.NA, index=out.index, dtype="string")
     for row in corrections.itertuples(index=False):
         mask = out["id"] == row.id
         if not mask.any():
@@ -168,24 +174,51 @@ def _id_priority(ids: pd.Series) -> pd.DataFrame:
 
 
 def mark_duplicates(df: pd.DataFrame) -> pd.DataFrame:
-    """Misma persona y fecha de inicio: mismo total -> duplicado; distinto -> desdoblamiento."""
+    """Misma persona y fecha de inicio: mismo total -> duplicado; distinto -> desdoblamiento.
+
+    Las decisiones revisadas a mano (`revisio_*`, desde `correcciones.csv`) mandan sobre la
+    detección automática:
+
+    - `revisio_duplicat_de = <id>`: el registro es un duplicado de `<id>`.
+    - `revisio_desdoblament = complementari`: mismo viaje con los costes repartidos; se suman
+      y se cuenta una vez.
+    - `revisio_desdoblament = independent`: viajes distintos; cada uno es su propio grupo.
+    - `revisio_desdoblament = pendent`: revisado pero sin resolver; sigue marcado.
+    """
     out = df.copy()
+    for field in REVIEW_FIELDS:
+        if field not in out:
+            out[field] = pd.Series(pd.NA, index=out.index, dtype="string")
+    unknown = set(out["revisio_desdoblament"].dropna()) - SPLIT_DECISIONS
+    if unknown:
+        raise ValueError(f"Decisión de desdoblamiento desconocida: {sorted(unknown)}")
+
     out["nom_clau"] = out["nom"].map(lambda s: " ".join(str(s).split()).casefold())
     order = pd.concat([out, _id_priority(out["id"])], axis=1).sort_values(
         ["nom_clau", "data_inici_clean", "rank", "num"]
     )
-    group_key = ["nom_clau", "data_inici_clean"]
-    order["grup_viatge"] = order.groupby(group_key)["id"].transform("first")
+    # Un viaje independiente forma su propio grupo
+    independent = (order["revisio_desdoblament"] == "independent").fillna(False)
+    order["clau_grup"] = order["data_inici_clean"].astype(str)
+    order.loc[independent, "clau_grup"] = order["clau_grup"] + "|" + order["id"]
+    group_key = ["nom_clau", "clau_grup"]
 
     has_total = order["total_clean"].notna()
     same_total_key = [*group_key, "total_clean"]
     dup = order.duplicated(same_total_key, keep="first") & has_total
     first_with_total = order.groupby(same_total_key, dropna=False)["id"].transform("first")
-    order["flag_duplicat"] = dup
-    order["duplicat_de"] = first_with_total.where(dup)
+    manual_dup = order["revisio_duplicat_de"].notna()
+    order["flag_duplicat"] = dup | manual_dup
+    order["duplicat_de"] = order["revisio_duplicat_de"].fillna(first_with_total.where(dup))
 
-    kept = (~order["flag_duplicat"]).groupby([order[k] for k in group_key]).transform("sum")
-    order["flag_possible_desdoblament"] = kept > 1
+    groups = [order[k] for k in group_key]
+    first_kept = order["id"].where(~order["flag_duplicat"]).groupby(groups).transform("first")
+    order["grup_viatge"] = first_kept.fillna(order.groupby(groups)["id"].transform("first"))
+
+    kept = (~order["flag_duplicat"]).groupby(groups).transform("sum")
+    resolved = order["revisio_desdoblament"].isin({"complementari", "independent"}).fillna(False)
+    resolved_group = resolved.groupby(groups).transform("any")
+    order["flag_possible_desdoblament"] = (kept > 1) & ~resolved_group
 
     cols = ["grup_viatge", "flag_duplicat", "duplicat_de", "flag_possible_desdoblament"]
     out[cols] = order[cols]
