@@ -73,6 +73,7 @@ def main(argv: list[str] | None = None) -> None:
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
     )
+    logging.getLogger("httpx").setLevel(logging.WARNING)  # una línia per petició és soroll
 
     if args.command == "ingest":
         run_ingest()

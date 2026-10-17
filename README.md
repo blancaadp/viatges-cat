@@ -9,7 +9,7 @@ Anàlisi independent dels viatges a l'estranger dels alts càrrecs i del persona
 
 ## Estat
 
-🚧 **Fase 3 — Automatització i còpia a Turso: codi fet, pendent de configurar el compte.**
+🚧 **Fase 3 — Automatització i còpia a Turso: Turso configurat, pendent dels secrets de GitHub.**
 
 | Fase | Descripció | Estat |
 |------|------------|-------|
