@@ -1,6 +1,6 @@
 # Fase 0 · Inventario de calidad de datos
 
-_Generado el 2026-10-17 17:38 UTC a partir de la instantánea descargada el 2026-09-29T16:51:11.327707+00:00._
+_Generado el 2026-10-17 17:44 UTC a partir de la instantánea descargada el 2026-09-29T16:51:11.327707+00:00._
 
 ## Resumen
 
@@ -227,9 +227,9 @@ Viajes de más de 21 días (revisar):
 
 |                        |   nulos |   relleno_o_vacios |   valores_distintos |
 |:-----------------------|--------:|-------------------:|--------------------:|
-| observacions           |     108 |               1025 |                 465 |
+| observacions           |     108 |               1026 |                 465 |
 | comitiva               |      61 |                562 |                 903 |
-| altres_despeses_detall |      83 |                461 |                 746 |
+| altres_despeses_detall |      83 |                462 |                 746 |
 | agenda                 |      26 |                 39 |                1398 |
 | carrec                 |       0 |                  0 |                 312 |
 | departament            |       0 |                  0 |                  39 |

@@ -12,6 +12,8 @@ DATASET_URL = f"https://{DOMAIN}/d/{DATASET_ID}"
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
+PROCESSED_DIR = DATA_DIR / "processed"
+MANUAL_DIR = DATA_DIR / "manual"
 REPORTS_DIR = ROOT / "reports"
 
 

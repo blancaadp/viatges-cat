@@ -67,7 +67,7 @@ def parse_date(s: pd.Series) -> tuple[pd.Series, pd.Series]:
 
 _ONLY_PUNCT = re.compile(r"^[\W_]*$")
 _PLACEHOLDER_WORDS = {
-    "0", "0.00", "0,00", "o,oo", "no", "cap", "sense", "res", "n/a", "cao",
+    "0", "0.00", "0,00", "o,oo", "no", "x", "cap", "sense", "res", "n/a", "cao",
     "no n'hi ha", "no hi ha", "no té comitiva", "sense comitiva", "no hi ha comitiva",
     "sense observacions", "cap observació", "no hi ha observacions",
     "no hi ha cap observació", "no hi cap observació", "sense obaservacions",

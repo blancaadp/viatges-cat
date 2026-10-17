@@ -1,6 +1,6 @@
 # 0002 · Reglas de limpieza (salida de la Fase 0)
 
-**Estado:** propuesta — revisar antes de implementar la Fase 1
+**Estado:** aceptada — implementada en `src/viatges/clean.py`
 
 ## Contexto
 

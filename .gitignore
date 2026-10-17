@@ -2,7 +2,9 @@
 .env
 
 # Datos descargados (se regeneran con `uv run viatges ingest`)
-data/
+data/*
+# …excepto los diccionarios y correcciones manuales, que son código
+!data/manual/
 
 # Python
 __pycache__/
@@ -16,3 +18,6 @@ __pycache__/
 
 # Sistema
 .DS_Store
+
+# R
+.Rhistory

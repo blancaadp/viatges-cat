@@ -1,0 +1,5 @@
+id,campo,valor_nuevo,motivo,fuente
+racc-438,destinacio,Tòquio (Japó) / Himeji (Japó),Dos destinos separados por coma y sin país,El propio registro (motiu: relaciones con el Japón)
+racc-57,destinacio,Andorra la Vella (Andorra),El campo contiene la institución visitada además de la ciudad,El propio registro
+raccERGO-2034,destinacio,Buenos Aires (Argentina),Tramo repetido pegado al anterior con un país incoherente (Buenos Aires · Uruguai),El propio registro
+raccERGO-2092,destinacio,Timişoara (Romania),Tramo repetido pegado al anterior con un país incoherente (Timişoara · Suècia),El propio registro
