@@ -1,6 +1,6 @@
 # 0002 · Regles de neteja (sortida de la Fase 0)
 
-**Estat:** acceptada — implementada a `src/viatges/clean.py`
+**Estat:** substituïda en part per l'[ADR 0004](0004-dades-tal-com-venen.md): les correccions ja no modifiquen valors, només s'anoten. Es mantenen la detecció de problemes, els duplicats i la normalització de destinacions.
 
 ## Context
 

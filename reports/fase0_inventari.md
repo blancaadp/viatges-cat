@@ -1,20 +1,20 @@
 # Fase 0 · Inventari de qualitat de les dades
 
-_Generat el 2026-10-17 18:04 UTC a partir de la instantània descarregada el 2026-09-29T16:51:11.327707+00:00._
+_Generat el 2026-10-17 18:21 UTC a partir de la instantània descarregada el 2026-10-17T18:13:55.520019+00:00._
 
 ## Resum
 
-- Files: **1511**
-- Darrera actualització de files segons el portal: 2026-09-29T09:28:48+00:00
-- Interval de dates d'inici: 2017-01-29 → 2026-09-10
-- Departaments diferents: 39 · Persones diferents: 284
+- Files: **1528**
+- Darrera actualització de files segons el portal: 2026-10-16T09:31:11+00:00
+- Interval de dates d'inici: 2017-01-29 → 2026-09-16
+- Departaments diferents: 39 · Persones diferents: 285
 - Columnes inesperades a l'esquema: cap
 - Columnes esperades que falten: cap
 
 ## Imports
 
 - Registres sense total: 2
-- Registres amb total 0: 101
+- Registres amb total 0: 102
 - Imports negatius: 0
 - Registres on la suma de partides no coincideix amb el total: 2
 
@@ -39,11 +39,11 @@ _Generat el 2026-10-17 18:04 UTC a partir de la instantània descarregada el 202
 
 |                 |   count |    mean |     std |   min |    25% |     50% |     75% |    max |
 |:----------------|--------:|--------:|--------:|------:|-------:|--------:|--------:|-------:|
-| dietes          |    1510 |  181.97 |  397.73 |     0 |   0    |   60.58 |  178.73 |   6000 |
-| allotjament     |    1511 |  958.89 | 2512.83 |     0 | 115.53 |  350    |  864    |  37720 |
-| transport       |    1511 | 1614.22 | 4844.2  |     0 | 253.71 |  489.1  | 1344.44 | 102653 |
-| altres_despeses |    1509 |  413.18 | 1524.67 |     0 |   0    |   44.3  |  162.1  |  33708 |
-| total           |    1509 | 3168.72 | 7986.02 |     0 | 570.02 | 1055.75 | 2720.86 | 134778 |
+| dietes          |    1527 |  182.53 |  398.89 |     0 |   0    |   60.6  |  179.13 |   6000 |
+| allotjament     |    1528 |  956.38 | 2500.37 |     0 | 117.08 |  350.25 |  864    |  37720 |
+| transport       |    1528 | 1628.89 | 4875.55 |     0 | 256.12 |  489.34 | 1351.93 | 102653 |
+| altres_despeses |    1526 |  415.07 | 1523.36 |     0 |   0    |   45.14 |  164.19 |  33708 |
+| total           |    1526 | 3183.34 | 8002.69 |     0 | 570.74 | 1056.62 | 2731.88 | 134778 |
 
 ### Mateix import en registres diferents (despesa compartida?)
 
@@ -95,9 +95,9 @@ Durada en dies (inclosos):
 
 |       |      0 |
 |:------|-------:|
-| count | 1510   |
+| count | 1527   |
 | mean  |    3.4 |
-| std   |    5   |
+| std   |    5.5 |
 | min   |    1   |
 | 25%   |    2   |
 | 50%   |    3   |
@@ -106,44 +106,47 @@ Durada en dies (inclosos):
 
 Viatges de més de 21 dies (revisar):
 
-|      | id        | destinacio           | data_inici          | data_fi             |
-|-----:|:----------|:---------------------|:--------------------|:--------------------|
-|  345 | racc-950  | Bolzano (Itàlia)     | 2023-05-10 00:00:00 | 2023-07-04 00:00:00 |
-|  545 | racc-340  | Londres (Regne Unit) | 2019-10-04 00:00:00 | 2019-11-05 00:00:00 |
-| 1217 | racc-1364 | Venice (Itàlia)      | 2024-04-17 00:00:00 | 2024-09-19 00:00:00 |
-| 1325 | racc-1699 | Bogotá (Colòmbia)    | 2025-11-03 00:00:00 | 2025-12-09 00:00:00 |
-| 1395 | racc-1148 | Perpinyà (França)    | 2024-01-19 00:00:00 | 2024-03-19 00:00:00 |
+|      | id            | destinacio                                | data_inici          | data_fi             |
+|-----:|:--------------|:------------------------------------------|:--------------------|:--------------------|
+|  345 | racc-950      | Bolzano (Itàlia)                          | 2023-05-10 00:00:00 | 2023-07-04 00:00:00 |
+|  545 | racc-340      | Londres (Regne Unit)                      | 2019-10-04 00:00:00 | 2019-11-05 00:00:00 |
+| 1217 | racc-1364     | Venice (Itàlia)                           | 2024-04-17 00:00:00 | 2024-09-19 00:00:00 |
+| 1325 | racc-1699     | Bogotá (Colòmbia)                         | 2025-11-03 00:00:00 | 2025-12-09 00:00:00 |
+| 1395 | racc-1148     | Perpinyà (França)                         | 2024-01-19 00:00:00 | 2024-03-19 00:00:00 |
+| 1511 | raccERGO-2107 | Brussel·les (Bèlgica)Brussel·les (França) | 2026-05-05 00:00:00 | 2026-08-08 00:00:00 |
 
 ## Duplicats
 
 - Ids duplicats: 0
-- Mateixa persona, data i destinació: 18 registres
+- Mateixa persona, data i destinació: 20 registres
 
-|      | id            | nom                     | data_inici              | destinacio                         |
-|-----:|:--------------|:------------------------|:------------------------|:-----------------------------------|
-|   76 | racc-1036     | Carme Portaceli         | 2023-11-13T00:00:00.000 | Brussels (Bèlgica)                 |
-|   81 | racc-1053     | Carme Portaceli         | 2023-11-13T00:00:00.000 | Brussels (Bèlgica)                 |
-|  106 | racc-1118     | Bernat Costas Castilla  | 2024-01-23T00:00:00.000 | Stockholm (Suècia)                 |
-|  672 | CMH024        | Natàlia Mas Guix        | 2018-07-10T00:00:00.000 | Edimburg (Regne Unit)              |
-|  673 | racc-94       | Natàlia Mas Guix        | 2018-07-10T00:00:00.000 | Edimburg (Regne Unit)              |
-|  677 | CMH020        | Ernest Maragall i Mira  | 2018-07-14T00:00:00.000 | Nova York (Estats Units d'Amèrica) |
-|  679 | racc-31       | Ernest Maragall i Mira  | 2018-07-14T00:00:00.000 | Nova York (Estats Units d'Amèrica) |
-|  837 | racc-1098     | Ismael Peña López       | 2022-11-20T00:00:00.000 | Sucre (Bolívia)                    |
-|  838 | racc-904      | Ismael Peña López       | 2022-11-20T00:00:00.000 | Sucre (Bolívia)                    |
-| 1072 | racc-1131     | Bernat Costas Castilla  | 2024-01-23T00:00:00.000 | Stockholm (Suècia)                 |
-| 1139 | racc-1455     | Aleix Cubells Barceló   | 2025-02-19T00:00:00.000 | Brussels (Bèlgica)                 |
-| 1326 | racc-1701     | Aleix Cubells Barceló   | 2025-02-19T00:00:00.000 | Brussels (Bèlgica)                 |
-| 1431 | raccERGO-2039 | Carme Portaceli         | 2026-05-03T00:00:00.000 | Budapest (Hongria)                 |
-| 1446 | raccERGO-2047 | Elisabet Cirici i Amell | 2026-05-19T00:00:00.000 | Baku (Azerbaidjan)                 |
-| 1449 | raccERGO-2061 | Carme Portaceli         | 2026-05-03T00:00:00.000 | Budapest (Hongria)                 |
-| 1459 | raccERGO-2068 | Elisabet Cirici i Amell | 2026-05-19T00:00:00.000 | Baku (Azerbaidjan)                 |
-| 1496 | raccERGO-2095 | Alberto Lacasta Huelin  | 2026-07-31T00:00:00.000 | Amsterdam (Països Baixos)          |
-| 1506 | raccERGO-2128 | Alberto Lacasta Huelin  | 2026-07-31T00:00:00.000 | Amsterdam (Països Baixos)          |
+|      | id            | nom                       | data_inici              | destinacio                         |
+|-----:|:--------------|:--------------------------|:------------------------|:-----------------------------------|
+|   76 | racc-1036     | Carme Portaceli           | 2023-11-13T00:00:00.000 | Brussels (Bèlgica)                 |
+|   81 | racc-1053     | Carme Portaceli           | 2023-11-13T00:00:00.000 | Brussels (Bèlgica)                 |
+|  106 | racc-1118     | Bernat Costas Castilla    | 2024-01-23T00:00:00.000 | Stockholm (Suècia)                 |
+|  672 | CMH024        | Natàlia Mas Guix          | 2018-07-10T00:00:00.000 | Edimburg (Regne Unit)              |
+|  673 | racc-94       | Natàlia Mas Guix          | 2018-07-10T00:00:00.000 | Edimburg (Regne Unit)              |
+|  677 | CMH020        | Ernest Maragall i Mira    | 2018-07-14T00:00:00.000 | Nova York (Estats Units d'Amèrica) |
+|  679 | racc-31       | Ernest Maragall i Mira    | 2018-07-14T00:00:00.000 | Nova York (Estats Units d'Amèrica) |
+|  837 | racc-1098     | Ismael Peña López         | 2022-11-20T00:00:00.000 | Sucre (Bolívia)                    |
+|  838 | racc-904      | Ismael Peña López         | 2022-11-20T00:00:00.000 | Sucre (Bolívia)                    |
+| 1072 | racc-1131     | Bernat Costas Castilla    | 2024-01-23T00:00:00.000 | Stockholm (Suècia)                 |
+| 1139 | racc-1455     | Aleix Cubells Barceló     | 2025-02-19T00:00:00.000 | Brussels (Bèlgica)                 |
+| 1326 | racc-1701     | Aleix Cubells Barceló     | 2025-02-19T00:00:00.000 | Brussels (Bèlgica)                 |
+| 1404 | racc-1597     | Sònia Hernández Almodóvar | 2025-07-10T00:00:00.000 | Humlebæk (Dinamarca)               |
+| 1431 | raccERGO-2039 | Carme Portaceli           | 2026-05-03T00:00:00.000 | Budapest (Hongria)                 |
+| 1446 | raccERGO-2047 | Elisabet Cirici i Amell   | 2026-05-19T00:00:00.000 | Baku (Azerbaidjan)                 |
+| 1449 | raccERGO-2061 | Carme Portaceli           | 2026-05-03T00:00:00.000 | Budapest (Hongria)                 |
+| 1459 | raccERGO-2068 | Elisabet Cirici i Amell   | 2026-05-19T00:00:00.000 | Baku (Azerbaidjan)                 |
+| 1496 | raccERGO-2095 | Alberto Lacasta Huelin    | 2026-07-31T00:00:00.000 | Amsterdam (Països Baixos)          |
+| 1506 | raccERGO-2128 | Alberto Lacasta Huelin    | 2026-07-31T00:00:00.000 | Amsterdam (Països Baixos)          |
+| 1525 | raccERGO-1824 | Sònia Hernández Almodóvar | 2025-07-10T00:00:00.000 | Humlebæk (Dinamarca)               |
 
 ## Destinacions
 
-- Valors diferents del camp destinació: 465
-- Viatges amb diverses destinacions: 139
+- Valors diferents del camp destinació: 471
+- Viatges amb diverses destinacions: 141
 
 ### Trams sense país entre parèntesis
 
@@ -182,14 +185,14 @@ Viatges de més de 21 dies (revisar):
 
 | clau   | variants                                                          |   n_variants |   n_registres |
 |:-------|:------------------------------------------------------------------|-------------:|--------------:|
-| bruss  | "Brussel·les | BRUSSEL·LES | Brussel.les | Brussels | Brussel·les |            5 |           368 |
+| bruss  | "Brussel·les | BRUSSEL·LES | Brussel.les | Brussels | Brussel·les |            5 |           371 |
 | washi  | Washington | Washington D.C. | Washington DC | Washington, D.C.   |            4 |            18 |
-| berli  | Berlin | Berlin Köpenick | Berlín                                 |            3 |            36 |
+| berli  | Berlin | Berlin Köpenick | Berlín                                 |            3 |            37 |
 | copen  | Copenhagen | Copenhaghen | Copenhaguen                            |            3 |            17 |
 | marse  | Marseille | Marseille 10 | Marsella                               |            3 |            16 |
 | munic  | Munic | Munich | Múnic                                            |            3 |            14 |
 | saint  | Saint-Gaudens | Saint-Louis | Saint-Malo                          |            3 |             5 |
-| paris  | Paris | París                                                     |            2 |            77 |
+| paris  | Paris | París                                                     |            2 |            79 |
 | lisbo  | Lisboa | Lisbon                                                   |            2 |            42 |
 | newyo  | New York City | New York Mills                                    |            2 |            32 |
 | andor  | Andorra la Vella | Andorra la vella                               |            2 |            30 |
@@ -198,8 +201,8 @@ Viatges de més de 21 dies (revisar):
 | amste  | Amsterdam | Àmsterdam                                             |            2 |            19 |
 | dubli  | Dublin | Dublín                                                   |            2 |            11 |
 | canne  | Cannes | Cannes-Écluse                                            |            2 |            10 |
+| gineb  | GINEBRA | Ginebra                                                 |            2 |            10 |
 | bogot  | Bogotà | Bogotá                                                   |            2 |             9 |
-| gineb  | GINEBRA | Ginebra                                                 |            2 |             9 |
 | estra  | Estrasbug | Estrasburg                                            |            2 |             8 |
 | telav  | Tel Aviv | Tel-Aviv                                               |            2 |             8 |
 
@@ -207,37 +210,37 @@ Viatges de més de 21 dies (revisar):
 
 | pais                   |   count |
 |:-----------------------|--------:|
-| Bèlgica                |     373 |
-| França                 |     226 |
+| Bèlgica                |     376 |
+| França                 |     229 |
 | Itàlia                 |     113 |
-| Alemanya               |      94 |
+| Alemanya               |      95 |
 | Regne Unit             |      83 |
-| Estats Units, els      |      69 |
-| Portugal               |      59 |
-| Suïssa                 |      54 |
+| Estats Units, els      |      71 |
+| Portugal               |      60 |
+| Suïssa                 |      55 |
 | Japó                   |      42 |
-| Àustria                |      38 |
+| Àustria                |      40 |
 | Andorra                |      36 |
 | Estats Units d'Amèrica |      33 |
+| Xina                   |      33 |
 | Mèxic                  |      31 |
-| Xina                   |      30 |
 | Països Baixos          |      29 |
 
 ## Camps de text: nuls i valors de farciment
 
 |                        |   nuls |   farciment_o_buits |   valors_diferents |
 |:-----------------------|-------:|--------------------:|-------------------:|
-| observacions           |    108 |                1026 |                465 |
-| comitiva               |     61 |                 562 |                903 |
-| altres_despeses_detall |     83 |                 462 |                746 |
-| agenda                 |     26 |                  39 |               1398 |
-| carrec                 |      0 |                   0 |                312 |
+| observacions           |    109 |                1026 |                477 |
+| comitiva               |     61 |                 571 |                909 |
+| altres_despeses_detall |     83 |                 462 |                753 |
+| agenda                 |     26 |                  39 |               1414 |
+| carrec                 |      0 |                   0 |                313 |
 | departament            |      0 |                   0 |                 39 |
-| destinacio             |      0 |                   0 |                465 |
-| id                     |      0 |                   0 |               1511 |
-| motiu                  |      0 |                   0 |               1319 |
-| nom                    |      0 |                   0 |                284 |
-| unitat_organica        |      0 |                   0 |                238 |
+| destinacio             |      0 |                   0 |                471 |
+| id                     |      0 |                   0 |               1528 |
+| motiu                  |      0 |                   0 |               1335 |
+| nom                    |      0 |                   0 |                285 |
+| unitat_organica        |      0 |                   0 |                239 |
 
 ## Decisions de neteja
 

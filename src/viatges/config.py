@@ -14,6 +14,7 @@ DATA_DIR = ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
 PROCESSED_DIR = DATA_DIR / "processed"
 MANUAL_DIR = DATA_DIR / "manual"
+DB_PATH = DATA_DIR / "viatges.sqlite"
 REPORTS_DIR = ROOT / "reports"
 
 

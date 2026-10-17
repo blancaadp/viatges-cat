@@ -9,16 +9,24 @@ Anàlisi independent dels viatges a l'estranger dels alts càrrecs i del persona
 
 ## Estat
 
-🚧 **Fase 1 — Neteja i normalització.**
+🚧 **Fase 3 — Automatització i còpia a una base de dades allotjada (Turso).**
 
 | Fase | Descripció | Estat |
 |------|------------|-------|
 | 0 | Ingesta en cru via API SODA i inventari de qualitat | ✅ |
-| 1 | Neteja i normalització (destinacions, imports, dates) | 🚧 |
-| 2 | Emmagatzematge i detecció de canvis entre instantànies | ⏳ |
-| 3 | Automatització setmanal (GitHub Actions) | ⏳ |
+| 1 | Preparació: dades tal com venen + marques, exclusió p99 de durada | ✅ |
+| 2 | Detecció de canvis entre instantànies i base de dades SQLite | ✅ |
+| 3 | Automatització setmanal (GitHub Actions) i còpia a Turso | ⏳ |
 | 4 | Web pública | ⏳ |
 | 5 | Model de cost esperat i viatges atípics | ⏳ |
+
+## Criteris de l'anàlisi
+
+Les dades s'analitzen **tal com les publica la Generalitat**. No es corregeix cap valor: els
+problemes detectats (duplicats, imports incomplets, errors de data…) queden marcats en
+columnes a part. L'única exclusió són els viatges amb una durada per sobre del percentil 99
+(ara mateix, més d'11 dies), que són majoritàriament errors de data.
+Detalls a [docs/decisions/0004-dades-tal-com-venen.md](docs/decisions/0004-dades-tal-com-venen.md).
 
 ## Ús
 
@@ -29,7 +37,10 @@ uv sync                       # instal·la les dependències
 cp .env.example .env          # opcional: hi afegeixes la teva SODA_APP_TOKEN
 uv run viatges ingest         # descarrega una instantània a data/raw/
 uv run viatges profile        # genera reports/fase0_inventari.md
-uv run viatges clean          # genera data/processed/<instantània>/ i reports/fase1_neteja.md
+uv run viatges prepare        # genera data/processed/<instantània>/ i reports/fase1_preparacio.md
+uv run viatges changes        # compara les dues darreres instantànies -> reports/canvis/
+uv run viatges build          # reconstrueix data/viatges.sqlite a partir de totes les instantànies
+uv run viatges update         # ingest + changes + prepare + build
 uv run pytest                 # tests
 ```
 
@@ -42,9 +53,11 @@ src/viatges/
   schema.py      esquema esperat i mapatge de columnes de l'API
   ingest.py      descarrega instantànies en cru i immutables
   profiling.py   inventari de qualitat de les dades (Fase 0)
-  clean.py       neteja i normalització (Fase 1, regles a l'ADR 0002)
-  cli.py         ordres `viatges ingest`, `viatges profile` i `viatges clean`
-data/manual/     diccionaris i correccions manuals (versionats)
+  prepare.py     preparació per a l'anàlisi (Fase 1, ADR 0004)
+  changes.py     detecció de canvis entre instantànies (Fase 2, ADR 0003)
+  store.py       base de dades SQLite derivada (Fase 2, ADR 0003)
+  cli.py         ordres `viatges ingest|profile|prepare|changes|build|update`
+data/manual/     diccionaris i anotacions manuals (versionats)
 docs/decisions/  registre de decisions d'arquitectura (ADR)
 reports/         informes generats
 notebooks/       exploració lliure (important el paquet)

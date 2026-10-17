@@ -1,10 +1,14 @@
-"""Fase 1: neteja i normalització.
+"""Fase 1: preparació de les dades per a l'anàlisi.
 
-Implementa les regles de `docs/decisions/0002-regles-de-neteja.md`. Resum:
+Les dades s'analitzen tal com venen (ADR 0004). Aquí només:
 
-- Les columnes originals es conserven; el que és net va en columnes noves (`*_clean`, `ambit`…).
-- No s'esborra res: els problemes s'assenyalen amb columnes `flag_*`.
-- Les regles generals són aquí; les excepcions cas per cas, a `data/manual/`.
+- es converteixen imports i dates de text a número o data (`*_eur`, `*_iso`);
+- s'afegeixen marques (`flag_*`, `motiu_import_zero`, `correccio_*`, `revisio_*`) que no
+  modifiquen cap valor publicat;
+- es deriven les destinacions normalitzades (taula `trams`) i l'àmbit del departament;
+- es marquen per excloure de l'anàlisi els viatges amb una durada per sobre del p99.
+
+Les excepcions cas per cas són a `data/manual/`.
 """
 
 from __future__ import annotations
@@ -22,7 +26,6 @@ from viatges.profiling import (
     load_snapshot,
     parse_amount,
     parse_date,
-    placeholder_mask,
     strip_accents,
 )
 from viatges.schema import AMOUNT_COLUMNS, COST_COLUMNS
@@ -30,8 +33,7 @@ from viatges.schema import AMOUNT_COLUMNS, COST_COLUMNS
 log = logging.getLogger(__name__)
 
 ROUNDING_TOLERANCE = 5.0  # € de diferència acceptada entre la suma de partides i el total
-MAX_PLAUSIBLE_DAYS = 21
-TEXT_COLUMNS = ["observacions", "comitiva", "altres_despeses_detall", "agenda"]
+EXCLUSION_QUANTILE = 0.99  # durada per sobre de la qual un viatge s'exclou de l'anàlisi
 HOME_COUNTRY = "ES"
 
 # Camps de revisió manual: no existeixen al dataset, els crea `correccions.csv`
@@ -47,7 +49,7 @@ SPLIT_DECISIONS = {"complementari", "independent", "pendent"}
 class Manual:
     paisos: pd.DataFrame  # variant, pais, iso2
     ciutats: pd.DataFrame  # variant, ciutat, iso2
-    departaments: pd.DataFrame  # departament, departament_clean, ambit
+    departaments: pd.DataFrame  # departament, ambit
     correccions: pd.DataFrame  # id, camp, valor_nou, motiu, font
 
 
@@ -73,8 +75,13 @@ def lookup_key(text: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def apply_corrections(df: pd.DataFrame, corrections: pd.DataFrame) -> pd.DataFrame:
-    """Substitueix valors puntuals i en deixa constància a la columna `correccions`."""
+def annotate_corrections(df: pd.DataFrame, corrections: pd.DataFrame) -> pd.DataFrame:
+    """Afegeix les correccions manuals com a anotació, sense modificar cap valor publicat.
+
+    Una correcció sobre un camp del dataset (p. ex. `data_fi`) es desa a `correccio_<camp>`.
+    Els camps de revisió (`revisio_*`) es desen tal qual. La columna `correccions` llista
+    els camps anotats de cada registre.
+    """
     out = df.copy()
     out["correccions"] = ""
     for field in REVIEW_FIELDS:
@@ -84,9 +91,15 @@ def apply_corrections(df: pd.DataFrame, corrections: pd.DataFrame) -> pd.DataFra
         if not mask.any():
             log.warning("Correcció per a un id que no existeix: %s", row.id)
             continue
-        if row.camp not in out.columns:
+        if row.camp in REVIEW_FIELDS:
+            target = row.camp
+        elif row.camp in df.columns:
+            target = f"correccio_{row.camp}"
+            if target not in out:
+                out[target] = pd.Series(pd.NA, index=out.index, dtype="string")
+        else:
             raise ValueError(f"Correcció sobre una columna desconeguda: {row.camp}")
-        out.loc[mask, row.camp] = row.valor_nou
+        out.loc[mask, target] = row.valor_nou
         out.loc[mask, "correccions"] += f"{row.camp};"
     out["correccions"] = out["correccions"].str.rstrip(";").replace("", pd.NA)
     return out
@@ -115,32 +128,26 @@ def classify_zero_total(observacions: pd.Series) -> pd.Series:
     return out
 
 
-def clean_amounts(df: pd.DataFrame) -> pd.DataFrame:
+def parse_amounts(df: pd.DataFrame) -> pd.DataFrame:
+    """Imports en euros tal com venen; només es marquen els problemes."""
     out = df.copy()
     for col in AMOUNT_COLUMNS:
-        out[f"{col}_clean"] = parse_amount(df[col])[0]
-    parts = out[[f"{c}_clean" for c in COST_COLUMNS]]
+        out[f"{col}_eur"] = parse_amount(df[col])[0]
+    parts = out[[f"{c}_eur" for c in COST_COLUMNS]]
     all_parts = parts.notna().all(axis=1)
     parts_sum = parts.sum(axis=1)
 
-    # Total buit però partides completes -> la suma
-    fill = out["total_clean"].isna() & all_parts
-    out.loc[fill, "total_clean"] = parts_sum[fill]
-    out["flag_total_calculat"] = fill.fillna(False).astype(bool)
-
     # Suma de partides ≠ total: arrodoniment tolerable o inconsistència
-    diff = (out["total_clean"] - parts_sum).abs().where(all_parts)
+    diff = (out["total_eur"] - parts_sum).abs().where(all_parts)
     in_range = diff.between(0.01, ROUNDING_TOLERANCE, inclusive="right")
     out["flag_redondeig"] = in_range.fillna(False).astype(bool)
     out["flag_import_inconsistent"] = (diff > ROUNDING_TOLERANCE).fillna(False).astype(bool)
 
     # Total = 0: per què
-    zero = (out["total_clean"] == 0).fillna(False).astype(bool)
+    zero = (out["total_eur"] == 0).fillna(False).astype(bool)
     out["motiu_import_zero"] = classify_zero_total(out["observacions"]).where(zero)
-    pending = (out["motiu_import_zero"] == "pendent").fillna(False).astype(bool)
-    out.loc[pending, [f"{c}_clean" for c in AMOUNT_COLUMNS]] = pd.NA
 
-    out["flag_import_incomplet"] = out[[f"{c}_clean" for c in AMOUNT_COLUMNS]].isna().any(axis=1)
+    out["flag_import_incomplet"] = out[[f"{c}_eur" for c in AMOUNT_COLUMNS]].isna().any(axis=1)
     return out
 
 
@@ -149,16 +156,20 @@ def clean_amounts(df: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 
-def clean_dates(df: pd.DataFrame) -> pd.DataFrame:
+def parse_dates(df: pd.DataFrame) -> pd.DataFrame:
+    """Dates tal com venen i exclusió dels viatges amb una durada per sobre del p99."""
     out = df.copy()
-    out["data_inici_clean"] = parse_date(df["data_inici"])[0].dt.date
-    out["data_fi_clean"] = parse_date(df["data_fi"])[0].dt.date
-    days = (
-        pd.to_datetime(out["data_fi_clean"]) - pd.to_datetime(out["data_inici_clean"])
-    ).dt.days + 1
+    out["data_inici_iso"] = parse_date(df["data_inici"])[0].dt.date
+    out["data_fi_iso"] = parse_date(df["data_fi"])[0].dt.date
+    days = (pd.to_datetime(out["data_fi_iso"]) - pd.to_datetime(out["data_inici_iso"])).dt.days + 1
     out["durada_dies"] = days.astype("Int64")
-    out["flag_durada_sospitosa"] = (out["durada_dies"] > MAX_PLAUSIBLE_DAYS).fillna(False)
+    out["exclos_analisi"] = (out["durada_dies"] > duration_threshold(out)).fillna(False)
     return out
+
+
+def duration_threshold(df: pd.DataFrame) -> float:
+    """Durada (dies) per sobre de la qual un viatge s'exclou de l'anàlisi (ADR 0004)."""
+    return float(df["durada_dies"].astype("float").quantile(EXCLUSION_QUANTILE))
 
 
 # ---------------------------------------------------------------------------
@@ -195,16 +206,16 @@ def mark_duplicates(df: pd.DataFrame) -> pd.DataFrame:
 
     out["nom_clau"] = out["nom"].map(lambda s: " ".join(str(s).split()).casefold())
     order = pd.concat([out, _id_priority(out["id"])], axis=1).sort_values(
-        ["nom_clau", "data_inici_clean", "rank", "num"]
+        ["nom_clau", "data_inici_iso", "rank", "num"]
     )
     # Un viatge independent forma el seu propi grup
     independent = (order["revisio_desdoblament"] == "independent").fillna(False)
-    order["clau_grup"] = order["data_inici_clean"].astype(str)
+    order["clau_grup"] = order["data_inici_iso"].astype(str)
     order.loc[independent, "clau_grup"] = order["clau_grup"] + "|" + order["id"]
     group_key = ["nom_clau", "clau_grup"]
 
-    has_total = order["total_clean"].notna()
-    same_total_key = [*group_key, "total_clean"]
+    has_total = order["total_eur"].notna()
+    same_total_key = [*group_key, "total_eur"]
     dup = order.duplicated(same_total_key, keep="first") & has_total
     first_with_total = order.groupby(same_total_key, dropna=False)["id"].transform("first")
     manual_dup = order["revisio_duplicat_de"].notna()
@@ -272,6 +283,26 @@ def normalize_place(text: str | None) -> str | None:
     return t or None
 
 
+def _parsed_trams(destinacio: str | None) -> list[tuple[str | None, str | None, str]]:
+    """(ciutat, país, tram) de cada tram, sense repetir una ciutat consecutiva.
+
+    Al portal apareix sovint el mateix tram dues vegades enganxat i amb un país
+    incoherent ("Zagreb (Croàcia)Zagreb (Romania)"). Ens quedem el primer.
+    """
+    out: list[tuple[str | None, str | None, str]] = []
+    previous = None
+    for tram in split_trams(str(destinacio or "")):
+        m = _TRAM_RE.match(tram)
+        ciutat = normalize_place(m["ciutat"]) if m else normalize_place(tram)
+        pais = normalize_place(m["pais"]) if m else None
+        key = lookup_key(ciutat) if ciutat else None
+        if key and key == previous:
+            continue
+        previous = key
+        out.append((ciutat, pais, tram))
+    return out
+
+
 def build_trams(df: pd.DataFrame, manual: Manual) -> pd.DataFrame:
     """Una fila per tram amb ciutat i país normalitzats (ISO 3166-1 alfa-2)."""
     paisos = {lookup_key(r.variant): (r.pais, r.iso2) for r in manual.paisos.itertuples()}
@@ -282,11 +313,7 @@ def build_trams(df: pd.DataFrame, manual: Manual) -> pd.DataFrame:
 
     rows = []
     for viatge_id, destinacio in df[["id", "destinacio"]].itertuples(index=False):
-        for ordre, tram in enumerate(split_trams(str(destinacio or "")), start=1):
-            m = _TRAM_RE.match(tram)
-            ciutat_raw = normalize_place(m["ciutat"]) if m else normalize_place(tram)
-            pais_raw = normalize_place(m["pais"]) if m else None
-
+        for ordre, (ciutat_raw, pais_raw, tram) in enumerate(_parsed_trams(destinacio), start=1):
             iso = paisos.get(lookup_key(pais_raw), (None, None))[1] if pais_raw else None
             pais_mapejat = iso is not None
             ciutat, ciutat_mapejada = ciutat_raw, False
@@ -326,32 +353,23 @@ def summarize_trams(df: pd.DataFrame, trams: pd.DataFrame) -> pd.DataFrame:
     )
     out = df.merge(per_trip, left_on="id", right_index=True, how="left")
     out["n_trams"] = out["n_trams"].fillna(0).astype(int)
+    n_written = out["destinacio"].map(lambda d: len(split_trams(str(d or ""))))
+    out["flag_tram_repetit"] = n_written > out["n_trams"]
     for flag in ["flag_desti_sense_pais", "flag_no_estranger"]:
         out[flag] = out[flag].fillna(flag == "flag_desti_sense_pais").astype(bool)
     return out
 
 
 # ---------------------------------------------------------------------------
-# Departaments i textos
+# Departaments
 # ---------------------------------------------------------------------------
 
 
-def clean_departments(df: pd.DataFrame, departaments: pd.DataFrame) -> pd.DataFrame:
+def add_ambit(df: pd.DataFrame, departaments: pd.DataFrame) -> pd.DataFrame:
+    """Àmbit estable entre legislatures; el nom del departament es conserva tal com ve."""
     key = df["departament"].map(lambda s: " ".join(str(s).split()))
-    mapping = departaments.set_index("departament")
     out = df.copy()
-    out["departament_clean"] = key.map(mapping["departament_clean"]).fillna(key)
-    out["ambit"] = key.map(mapping["ambit"])
-    return out
-
-
-def clean_texts(df: pd.DataFrame) -> pd.DataFrame:
-    out = df.copy()
-    for col in TEXT_COLUMNS:
-        if col not in out:
-            out[col] = pd.NA
-        text = out[col].astype("string").str.strip()
-        out[f"{col}_clean"] = text.mask(placeholder_mask(out[col]))
+    out["ambit"] = key.map(departaments.set_index("departament")["ambit"])
     return out
 
 
@@ -360,16 +378,15 @@ def clean_texts(df: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 
-def clean(df: pd.DataFrame, manual: Manual) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Retorna (viatges, trams) nets."""
-    viatges = apply_corrections(df, manual.correccions)
-    viatges = clean_amounts(viatges)
-    viatges = clean_dates(viatges)
+def prepare(df: pd.DataFrame, manual: Manual) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Retorna (viatges, trams) preparats per a l'anàlisi."""
+    viatges = annotate_corrections(df, manual.correccions)
+    viatges = parse_amounts(viatges)
+    viatges = parse_dates(viatges)
     viatges = mark_duplicates(viatges)
     trams = build_trams(viatges, manual)
     viatges = summarize_trams(viatges, trams)
-    viatges = clean_departments(viatges, manual.departaments)
-    viatges = clean_texts(viatges)
+    viatges = add_ambit(viatges, manual.departaments)
     return viatges, trams
 
 
@@ -379,26 +396,38 @@ def _table(obj: pd.DataFrame | pd.Series, empty: str = "_Cap._") -> str:
 
 def render_report(viatges: pd.DataFrame, trams: pd.DataFrame, info: dict) -> str:
     flags = viatges[[c for c in viatges.columns if c.startswith("flag_")]].sum()
+    excluded = viatges.loc[
+        viatges["exclos_analisi"], ["id", "nom", "data_inici_iso", "data_fi_iso", "durada_dies"]
+    ].sort_values("durada_dies", ascending=False)
+    total = viatges["total_eur"].sum()
+    excluded_total = viatges.loc[viatges["exclos_analisi"], "total_eur"].sum()
     unmapped_countries = trams.loc[~trams["pais_mapejat"] & trams["pais_raw"].notna(), "pais_raw"]
     no_country = trams.loc[trams["iso2"].isna(), "tram"]
     remaining_variants = city_variant_groups(trams.dropna(subset=["ciutat"]))
-    dups = viatges.loc[viatges["flag_duplicat"], ["id", "duplicat_de", "nom", "total_clean"]]
+    dups = viatges.loc[viatges["flag_duplicat"], ["id", "duplicat_de", "nom", "total_eur"]]
     splits = viatges.loc[
         viatges["flag_possible_desdoblament"],
-        ["grup_viatge", "id", "nom", "data_inici_clean", "total_clean"],
+        ["grup_viatge", "id", "nom", "data_inici_iso", "total_eur"],
     ].sort_values(["grup_viatge", "id"])
     lines = [
-        "# Fase 1 · Resultat de la neteja",
+        "# Fase 1 · Preparació de les dades",
         "",
-        f"_Instantània descarregada el {info.get('downloaded_at', '?')}. "
-        "Regles: [ADR 0002](../docs/decisions/0002-regles-de-neteja.md)._",
+        f"_Instantània descarregada el {info.get('downloaded_at', '?')}. Les dades "
+        "s'analitzen tal com venen: vegeu l'"
+        "[ADR 0004](../docs/decisions/0004-dades-tal-com-venen.md)._",
         "",
         f"- Viatges: **{len(viatges)}** · trams de destinació: **{len(trams)}**",
-        f"- Correccions manuals aplicades: {int(viatges['correccions'].notna().sum())}",
+        f"- Exclosos de l'anàlisi (durada > p99 = {duration_threshold(viatges):.0f} dies): "
+        f"**{len(excluded)}**, que sumen {excluded_total:,.0f} € de {total:,.0f} €",
+        f"- Registres amb anotacions manuals: {int(viatges['correccions'].notna().sum())}",
         f"- Ciutats diferents després de normalitzar: {trams['ciutat'].nunique()} "
         f"(abans {trams['ciutat_raw'].nunique()})",
         f"- Països diferents: {trams['iso2'].nunique()}",
         f"- Departaments sense àmbit assignat: {int(viatges['ambit'].isna().sum())}",
+        "",
+        "## Viatges exclosos de l'anàlisi",
+        "",
+        _table(excluded.set_index("id")),
         "",
         "## Senyals (`flag_*`)",
         "",
@@ -408,7 +437,7 @@ def render_report(viatges: pd.DataFrame, trams: pd.DataFrame, info: dict) -> str
         "",
         _table(viatges["motiu_import_zero"].value_counts()),
         "",
-        "## Duplicats descartats",
+        "## Duplicats marcats",
         "",
         _table(dups.set_index("id")),
         "",
@@ -438,15 +467,17 @@ def render_report(viatges: pd.DataFrame, trams: pd.DataFrame, info: dict) -> str
     return "\n".join(lines)
 
 
-def run_clean(snapshot_dir: Path, manual_dir: Path, processed_dir: Path, reports_dir: Path) -> Path:
+def run_prepare(
+    snapshot_dir: Path, manual_dir: Path, processed_dir: Path, reports_dir: Path
+) -> Path:
     df, info = load_snapshot(snapshot_dir)
-    viatges, trams = clean(df, load_manual(manual_dir))
+    viatges, trams = prepare(df, load_manual(manual_dir))
     out_dir = processed_dir / snapshot_dir.name
     out_dir.mkdir(parents=True, exist_ok=True)
     viatges.to_csv(out_dir / "viatges.csv", index=False)
     trams.to_csv(out_dir / "trams.csv", index=False)
     reports_dir.mkdir(parents=True, exist_ok=True)
-    (reports_dir / "fase1_neteja.md").write_text(
+    (reports_dir / "fase1_preparacio.md").write_text(
         render_report(viatges, trams, info), encoding="utf-8"
     )
     return out_dir

@@ -1,8 +1,4 @@
 id,camp,valor_nou,motiu,font
-racc-438,destinacio,Tòquio (Japó) / Himeji (Japó),Dues destinacions separades per coma i sense país,El mateix registre (motiu: relacions amb el Japó)
-racc-57,destinacio,Andorra la Vella (Andorra),El camp conté la institució visitada a més de la ciutat,El mateix registre
-raccERGO-2034,destinacio,Buenos Aires (Argentina),Tram repetit enganxat a l'anterior amb un país incoherent (Buenos Aires · Uruguai),El mateix registre
-raccERGO-2092,destinacio,Timişoara (Romania),Tram repetit enganxat a l'anterior amb un país incoherent (Timişoara · Suècia),El mateix registre
 racc-1036,revisio_duplicat_de,racc-1053,"Mateix viatge publicat dues vegades; només canvia altres_despeses (120,60 vs 160,60). Es conserva el més recent com a versió corregida",Revisió manual 2026-10-17
 racc-1735,revisio_duplicat_de,raccERGO-2037,"Mateix viatge publicat dues vegades; diferència de 0,50 € a altres_despeses. Es conserva el més recent",Revisió manual 2026-10-17
 racc-689,revisio_duplicat_de,racc-787,Mateix viatge i comitiva amb tots els imports a 0; racc-787 té els costos,Revisió manual 2026-10-17
@@ -22,3 +18,5 @@ racc-1148,data_fi,2024-01-19,Data de fi publicada 2024-03-19 (61 dies); error de
 racc-1364,data_fi,2024-04-19,Data de fi publicada 2024-09-19 (156 dies); error de mes,"Viatges de la mateixa persona a Berlín (racc-1365, 20/04) i Cambridge (racc-1369, 08/05); inauguració de la Biennal l'abril de 2024"
 racc-340,data_inici,2019-11-04,Data d'inici publicada 2019-10-04 (33 dies); error de mes,"World Travel Market 2019: 4-6 de novembre; la mateixa persona viatja al Japó el 08/11 (racc-341)"
 racc-1699,data_fi,2025-11-09,"Data de fi publicada 2025-12-09 (37 dies); error de mes. Confiança mitjana","Fòrum de Bogotà 5-6/11 (observacions); la seva acompanyant Andrea Costafreda viatja a Bogotà/Cali del 04/11 a l'11/11 (racc-1737) i és a Brussel·les el 08/12 (racc-1735)"
+raccERGO-2107,destinacio,Brussel·les (Bèlgica) / Lió (França),"Segon tram publicat com a ""Brussel·les (França)""; el motiu diu ""acompanyament MHP Lió""","Nota de premsa del Govern 820956 (7/5/2026, reunió a Lió amb el conseller Duch)"
+raccERGO-2107,data_fi,2026-05-08,Data de fi publicada 2026-08-08 (96 dies); error de mes,"Agenda del Govern 902428 (Brussel·les, 6/5/2026) i nota de premsa 820956 (Lió, 7/5/2026)"

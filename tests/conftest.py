@@ -2,8 +2,10 @@
 
 import json
 
+import pandas as pd
 import pytest
 
+from viatges.prepare import Manual
 from viatges.schema import COLUMNS
 
 # fieldNames inventats a propòsit: el codi no ha de dependre de com els genera Socrata
@@ -58,11 +60,65 @@ ROWS = [
 ]  # fmt: skip
 
 
+def write_snapshot(raw_dir, name: str, rows: list[dict], downloaded_at: str = "x"):
+    """Escriu una instantània com les que deixa `viatges ingest`."""
+    d = raw_dir / name
+    d.mkdir(parents=True)
+    (d / "rows.json").write_text(json.dumps(rows), encoding="utf-8")
+    (d / "metadata.json").write_text(json.dumps(make_metadata()), encoding="utf-8")
+    manifest = {"downloaded_at": downloaded_at, "n_rows": len(rows)}
+    (d / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    return d
+
+
 @pytest.fixture
 def snapshot_dir(tmp_path):
-    d = tmp_path / "2026-01-01T000000Z"
-    d.mkdir()
-    (d / "rows.json").write_text(json.dumps(ROWS), encoding="utf-8")
-    (d / "metadata.json").write_text(json.dumps(make_metadata()), encoding="utf-8")
-    (d / "manifest.json").write_text(json.dumps({"downloaded_at": "x"}), encoding="utf-8")
-    return d
+    return write_snapshot(tmp_path, "2026-01-01T000000Z", ROWS)
+
+
+def frame(rows: list[dict]) -> pd.DataFrame:
+    return pd.DataFrame(rows).astype("string")
+
+
+@pytest.fixture
+def manual() -> Manual:
+    return Manual(
+        paisos=frame(
+            [
+                {"variant": "Bèlgica", "pais": "Bèlgica", "iso2": "BE"},
+                {"variant": "Polònia", "pais": "Polònia", "iso2": "PL"},
+                {"variant": "Japó", "pais": "Japó", "iso2": "JP"},
+                {"variant": "Malàisia", "pais": "Malàisia", "iso2": "MY"},
+                {"variant": "Estats Units, els", "pais": "Estats Units", "iso2": "US"},
+                {"variant": "Espanya", "pais": "Espanya", "iso2": "ES"},
+                {"variant": "França", "pais": "França", "iso2": "FR"},
+            ]
+        ),
+        ciutats=frame(
+            [
+                {"variant": "Brussels", "ciutat": "Brussel·les", "iso2": "BE"},
+                {"variant": "Gda?sk", "ciutat": "Gdańsk", "iso2": "PL"},
+                {"variant": "Tokyo", "ciutat": "Tòquio", "iso2": "JP"},
+                {"variant": "Perpignan", "ciutat": "Perpinyà", "iso2": "FR"},
+                {"variant": "Washington, D.C.", "ciutat": "Washington DC", "iso2": "US"},
+                {"variant": "Madrid", "ciutat": "Madrid", "iso2": "ES"},
+            ]
+        ),
+        departaments=frame(
+            [
+                {"departament": "Empresa", "ambit": "Empresa"},
+                {"departament": "Cultura", "ambit": "Cultura"},
+            ]
+        ),
+        correccions=frame(
+            [
+                {
+                    "id": "racc-X",
+                    "camp": "destinacio",
+                    "valor_nou": "Brussels (Bèlgica)",
+                    "motiu": "test",
+                    "font": "test",
+                }
+            ]
+        ),
+    )

@@ -11,6 +11,8 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import shutil
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -29,7 +31,23 @@ def _write_json(path: Path, obj: object) -> bytes:
 def run_ingest(client: SodaClient | None = None, raw_dir: Path = config.RAW_DIR) -> Path:
     now = datetime.now(UTC)
     snapshot_dir = raw_dir / now.strftime("%Y-%m-%dT%H%M%SZ")
-    snapshot_dir.mkdir(parents=True, exist_ok=False)
+    if snapshot_dir.exists():
+        raise FileExistsError(snapshot_dir)
+    # S'escriu en una carpeta temporal i es reanomena al final: una descàrrega fallida
+    # no deixa cap instantània a mitges.
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    tmp_dir = Path(tempfile.mkdtemp(prefix=".tmp-", dir=raw_dir))
+    try:
+        _download(client, tmp_dir, now)
+        tmp_dir.rename(snapshot_dir)
+    finally:
+        if tmp_dir.exists():
+            shutil.rmtree(tmp_dir)
+    log.info("Instantània desada a %s", snapshot_dir)
+    return snapshot_dir
+
+
+def _download(client: SodaClient | None, snapshot_dir: Path, now: datetime) -> None:
 
     owns_client = client is None
     client = client or SodaClient(config.DOMAIN, config.app_token(), config.app_secret())
@@ -55,12 +73,17 @@ def run_ingest(client: SodaClient | None = None, raw_dir: Path = config.RAW_DIR)
         "sha256_rows": hashlib.sha256(raw_bytes).hexdigest(),
     }
     _write_json(snapshot_dir / "manifest.json", manifest)
-    log.info("Instantània desada a %s (%d files)", snapshot_dir, len(rows))
-    return snapshot_dir
+    log.info("Descarregades %d files", len(rows))
+
+
+def list_snapshots(raw_dir: Path = config.RAW_DIR) -> list[Path]:
+    """Instantànies completes (amb manifest), de la més antiga a la més recent."""
+    complete = (p for p in raw_dir.glob("*") if (p / "manifest.json").exists())
+    return sorted(p for p in complete if not p.name.startswith("."))
 
 
 def latest_snapshot(raw_dir: Path = config.RAW_DIR) -> Path:
-    snapshots = sorted(p for p in raw_dir.glob("*") if (p / "manifest.json").exists())
+    snapshots = list_snapshots(raw_dir)
     if not snapshots:
         raise FileNotFoundError(f"No hi ha instantànies a {raw_dir}. Executa `viatges ingest`.")
     return snapshots[-1]
