@@ -311,10 +311,12 @@ def render_report(inv: dict, info: dict) -> str:
         "",
         _table(inv["placeholders"]),
         "",
-        "## Decisiones pendientes",
+        "## Decisiones de limpieza",
         "",
-        "_Completar a mano tras revisar este informe: qué regla de limpieza aplica a cada "
-        "problema y por qué. Estas decisiones alimentan la Fase 2._",
+        "_Las reglas para cada problema de este informe están en "
+        "[docs/decisions/0002-reglas-de-limpieza.md]"
+        "(../docs/decisions/0002-reglas-de-limpieza.md). "
+        "Si aparece un problema nuevo, añádelo allí antes de tocar el código._",
         "",
     ]
     return "\n".join(lines)
