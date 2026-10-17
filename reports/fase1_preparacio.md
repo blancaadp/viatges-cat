@@ -20,8 +20,8 @@ _Instantània descarregada el 2026-10-17T18:13:55.520019+00:00. Les dades s'anal
 | racc-1699     | Gerard Graells del Bas       | 2025-11-03       | 2025-12-09    |            37 |
 | racc-340      | Maria Àngels Chacón i Feixas | 2019-10-04       | 2019-11-05    |            33 |
 | racc-1488     | Carme Portaceli              | 2025-03-30       | 2025-04-13    |            15 |
-| racc-1487     | Carme Portaceli              | 2025-03-12       | 2025-03-26    |            15 |
 | racc-1644     | Oriol Lázaro Llovera         | 2025-03-20       | 2025-04-03    |            15 |
+| racc-1487     | Carme Portaceli              | 2025-03-12       | 2025-03-26    |            15 |
 | racc-843      | Carme Portaceli              | 2023-01-22       | 2023-02-03    |            13 |
 | racc-54       | David Ferrer i Canosa        | 2018-09-12       | 2018-09-23    |            12 |
 | racc-1027     | Roger Torrent i Ramió        | 2023-10-10       | 2023-10-21    |            12 |
