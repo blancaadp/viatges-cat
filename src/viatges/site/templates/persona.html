@@ -8,6 +8,9 @@
 <p class="muted">El nom apareix escrit com: {{ variants | join(" · ") }}.</p>
 {% endif %}
 
+<p class="lead">Darrer viatge: <a href="{{ base }}viatge/{{ last.id }}/">{{ last.destinacio }}</a>, el {{ last.data }}.<br>
+  <span class="muted">{{ last.carrec }}</span></p>
+
 <section class="kpis" aria-label="Xifres">
   {% for label, value in kpis %}
   <div class="kpi"><div class="kpi-label">{{ label }}</div><div class="kpi-value">{{ value }}</div></div>
@@ -17,6 +20,14 @@
 <p class="note">{{ n_no_compten }} {{ "registre no compta" if n_no_compten == 1 else "registres no compten" }} a
   les xifres perquè {{ "és un duplicat o té" if n_no_compten == 1 else "són duplicats o tenen" }} una durada anòmala.
   <a href="{{ base }}metodologia/">Per què?</a></p>
+{% endif %}
+
+{% if year_chart %}
+<section class="card">
+  <h2>Despesa per any</h2>
+  <p class="sub">Només els viatges que compten a les xifres.</p>
+  {{ year_chart | safe }}
+</section>
 {% endif %}
 
 <div class="grid-2">
@@ -43,7 +54,8 @@
 </div>
 
 <section class="card">
-  <h2>Viatges</h2>
+  <h2>Viatges ({{ trips | length }})</h2>
+  <p class="sub">Del més recent al més antic.</p>
   <div class="table-wrap flat">
     <table class="data trips person-trips">
       <thead><tr><th scope="col">Data</th><th scope="col">Destinació</th><th scope="col" class="num">Dies</th><th scope="col" class="num">Import</th></tr></thead>

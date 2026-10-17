@@ -6,6 +6,14 @@
     des del {{ first_year }}, amb les dades tal com les publica el portal de transparència.</p>
 </section>
 
+<form class="home-search" action="{{ base }}persones/" method="get" role="search">
+  <label for="cerca-inici">Cerca una persona</label>
+  <div class="home-search-row">
+    <input type="search" id="cerca-inici" name="q" placeholder="Nom o càrrec" autocomplete="off">
+    <button type="submit" class="button">Cerca</button>
+  </div>
+</form>
+
 <section class="kpis" aria-label="Xifres clau">
   {% for label, value in kpis %}
   <div class="kpi">

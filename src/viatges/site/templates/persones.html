@@ -5,6 +5,42 @@
 <p class="lead">Qui ha acumulat més despesa en viatges i qui té una despesa diària més alta. Els noms
   escrits de manera diferent (amb o sense accents, amb la «i» entre cognoms…) s'han unificat.</p>
 
+<section class="card" id="cercador">
+  <h2>Cerca una persona</h2>
+  <form class="filters tight" role="search" onsubmit="return false">
+    <label class="field grow">
+      <span>Nom o càrrec</span>
+      <input type="search" id="cerca-persona" name="q" placeholder="P. ex. Illa, consellera, Acció Exterior" autocomplete="off">
+    </label>
+  </form>
+  <p class="sub" id="resum-persones" aria-live="polite">{{ n_persones }} persones. Mostrant les 10 amb més despesa.</p>
+  <div class="table-wrap flat">
+    <table class="data people">
+      <thead>
+        <tr>
+          <th scope="col"><button type="button" data-sort="nom">Persona</button></th>
+          <th scope="col" class="num"><button type="button" data-sort="viatges">Viatges</button></th>
+          <th scope="col" class="num"><button type="button" data-sort="total" aria-sort="descending">Total</button></th>
+          <th scope="col" class="num"><button type="button" data-sort="diaria">Per dia</button></th>
+          <th scope="col" class="num"><button type="button" data-sort="darrer">Darrer viatge</button></th>
+        </tr>
+      </thead>
+      <tbody id="persones">
+        {% for p in people %}
+        <tr data-cerca="{{ p.cerca }}" data-nom="{{ p.persona }}" data-viatges="{{ p.s_viatges }}" data-total="{{ p.s_total }}" data-diaria="{{ p.s_diaria }}" data-darrer="{{ p.s_darrer }}">
+          <td><a href="{{ base }}persona/{{ p.id }}/">{{ p.persona }}</a><span class="meta">{{ p.carrec }}</span></td>
+          <td class="num">{{ p.viatges }}</td>
+          <td class="num">{{ p.total }}</td>
+          <td class="num">{{ p.diaria }}</td>
+          <td class="num">{{ p.darrer }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="more"><button type="button" class="button secondary" id="mostra-totes">Mostra totes les {{ n_persones }} persones</button></p>
+</section>
+
 <section class="card">
   <h2>Les 15 persones amb més despesa</h2>
   <div class="tablist" role="tablist" aria-label="Mesura">
@@ -38,33 +74,5 @@
     despesa de tota la comitiva, i per això la seva despesa diària és més alta.
     <a href="{{ base }}metodologia/">Més detalls</a>.</p>
 </section>
-
-<section class="card">
-  <h2>Totes les persones ({{ n_persones }})</h2>
-  <p class="sub">Ordenades per despesa total. El càrrec és el del viatge més recent.</p>
-  <div class="table-wrap flat">
-    <table class="data people">
-      <thead>
-        <tr>
-          <th scope="col">Persona</th>
-          <th scope="col" class="num">Viatges</th>
-          <th scope="col" class="num">Dies</th>
-          <th scope="col" class="num">Total</th>
-          <th scope="col" class="num">Per dia</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in people %}
-        <tr>
-          <td><a href="{{ base }}persona/{{ p.id }}/">{{ p.persona }}</a><span class="meta">{{ p.carrec }}</span></td>
-          <td class="num">{{ p.viatges }}</td>
-          <td class="num">{{ p.dies }}</td>
-          <td class="num">{{ p.total }}</td>
-          <td class="num">{{ p.diaria }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
 {% endblock %}
+{% block scripts %}<script src="{{ base }}persones.js?v={{ versio }}" defer></script>{% endblock %}

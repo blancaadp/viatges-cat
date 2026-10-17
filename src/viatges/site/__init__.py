@@ -7,6 +7,7 @@ es veuen encara que el navegador no executi JavaScript.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import math
@@ -329,22 +330,46 @@ def people_context(data: SiteData, base: str) -> dict:
         "total_rows": rows("total", table),
         "daily_rows": rows("diaria", daily),
         "min_trips": MIN_TRIPS_DAILY,
-        "n_persones": len(table),
-        "people": [
+        "n_persones": data.viatges["persona_id"].nunique(),
+        "people": people_directory(data, table),
+    }
+
+
+def people_directory(data: SiteData, table: pd.DataFrame) -> list[dict]:
+    """Totes les persones per al cercador, també les que no tenen cap viatge que compti.
+
+    `cerca` conté totes les variants del nom i tots els càrrecs, en minúscules i sense
+    accents, perquè es pugui trobar una persona per qualsevol d'ells.
+    """
+    v = data.viatges.sort_values("data_inici_iso")
+    groups = v.groupby("persona_id")
+    latest = groups.last()
+    search = groups.apply(
+        lambda g: _key(" ".join(map(str, [*g["nom"].unique(), *g["carrec"].unique()]))),
+        include_groups=False,
+    )
+    people = []
+    for pid, last in latest.iterrows():
+        r = table.loc[pid] if pid in table.index else None
+        known = r is not None and not math.isnan(r["diaria"])
+        people.append(
             {
                 "id": pid,
-                "persona": r.persona,
-                "carrec": r.carrec,
-                "viatges": fmt_int(r.viatges),
-                "dies": fmt_int(r.dies),
-                "total": fmt_eur(r.total),
-                "diaria": fmt_eur(r.diaria),
-                "total_num": r.total,
-                "diaria_num": None if math.isnan(r.diaria) else r.diaria,
+                "persona": last["persona"],
+                "carrec": last["carrec"],
+                "cerca": search[pid],
+                "viatges": fmt_int(r["viatges"]) if r is not None else "0",
+                "total": fmt_eur(r["total"]) if r is not None else "—",
+                "diaria": fmt_eur(r["diaria"]) if known else "—",
+                "darrer": fmt_date(last["data_inici_iso"]),
+                # valors per ordenar al navegador
+                "s_viatges": int(r["viatges"]) if r is not None else 0,
+                "s_total": float(r["total"]) if r is not None else 0.0,
+                "s_diaria": float(r["diaria"]) if known else 0.0,
+                "s_darrer": str(last["data_inici_iso"] or ""),
             }
-            for pid, r in zip(table.index, table.itertuples(), strict=True)
-        ],
-    }
+        )
+    return sorted(people, key=lambda p: p["s_total"], reverse=True)
 
 
 def person_context(pid: str, data: SiteData, table: pd.DataFrame, base: str) -> dict:
@@ -363,9 +388,35 @@ def person_context(pid: str, data: SiteData, table: pd.DataFrame, base: str) -> 
     names = country_names(data.trams)
     trams = data.trams[data.trams["id"].isin(counted["id"])]
     countries = trams[trams["iso2"].notna()].drop_duplicates(["id", "iso2"]).groupby("iso2").size()
+    last = trips.iloc[0]
+    by_year = counted.assign(any=counted["data_inici_iso"].str[:4]).groupby("any")
+    year_totals = by_year["total_eur"].sum()
+    year_counts = by_year.size()
+    year_chart = (
+        column_chart(
+            [
+                {
+                    "label": y,
+                    "value": float(t),
+                    "tip": f"{y}: {fmt_eur(t)} · {fmt_int(year_counts[y])} viatges",
+                }
+                for y, t in year_totals.items()
+            ],
+            f"Despesa per any de {trips['persona'].iloc[0]}",
+        )
+        if len(year_totals) >= 2
+        else None
+    )
     return {
         "persona": trips["persona"].iloc[0],
         "pid": pid,
+        "last": {
+            "id": last["id"],
+            "data": fmt_date(last["data_inici_iso"], long=True),
+            "destinacio": last["destinacio"],
+            "carrec": last["carrec"],
+        },
+        "year_chart": year_chart,
         "variants": sorted(set(trips["nom"].map(lambda n: " ".join(str(n).split())))),
         "roles": [
             (r.carrec, fmt_date(r.des_de), fmt_date(r.fins), r.n) for r in roles.itertuples()
@@ -393,7 +444,12 @@ def person_context(pid: str, data: SiteData, table: pd.DataFrame, base: str) -> 
                         ("flag_duplicat", "Duplicat"),
                     )
                     if bool(getattr(t, flag))
-                ],
+                ]
+                + (
+                    [ZERO_BADGES[t.motiu_import_zero]]
+                    if isinstance(t.motiu_import_zero, str)
+                    else []
+                ),
             }
             for t in trips.itertuples()
         ],
@@ -404,6 +460,13 @@ def person_context(pid: str, data: SiteData, table: pd.DataFrame, base: str) -> 
 def _key_series(s: pd.Series) -> pd.Series:
     return s.map(_key)
 
+
+ZERO_BADGES = {
+    "imputat_a_altre": "Import imputat a un altre registre",
+    "pagat_per_tercers": "Pagat per tercers",
+    "pendent": "Import pendent",
+    "sense_despesa": "Import 0",
+}
 
 FLAG_TEXTS = {
     "exclos_analisi": "Exclòs de l'anàlisi: la durada supera el percentil 99 i sol ser un "
@@ -496,8 +559,14 @@ def build_site(db_path: Path, manual_dir: Path, out_dir: Path, base: str = "/") 
         eur=fmt_eur, data=fmt_date, enter=fmt_int, text=text_or_none, enllacos=linkify
     )
     updated = data.instantanies["downloaded_at"].iloc[-1]
+    # Versió dels fitxers estàtics: canvia quan en canvia el contingut i evita que el
+    # navegador continuï fent servir un CSS o JS antic de la memòria cau.
+    digest = hashlib.sha256()
+    for f in sorted((HERE / "static").iterdir()):
+        digest.update(f.read_bytes())
     common = {
         "base": base,
+        "versio": digest.hexdigest()[:10],
         "dataset_url": DATASET_URL,
         "repo_url": REPO_URL,
         "updated": fmt_date(updated, long=True),

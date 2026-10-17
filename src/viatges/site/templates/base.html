@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Viatges dels alts càrrecs{% endblock %}</title>
   <meta name="description" content="{% block description %}Anàlisi independent dels viatges a l'estranger dels alts càrrecs de la Generalitat de Catalunya, a partir de les dades obertes.{% endblock %}">
-  <link rel="stylesheet" href="{{ base }}estil.css">
+  <link rel="stylesheet" href="{{ base }}estil.css?v={{ versio }}">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='7' fill='%232a78d6'/></svg>">
 </head>
 <body data-base="{{ base }}">
@@ -36,7 +36,7 @@
     </div>
   </footer>
   <div class="tooltip" role="status" hidden></div>
-  <script src="{{ base }}grafics.js" defer></script>
+  <script src="{{ base }}grafics.js?v={{ versio }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

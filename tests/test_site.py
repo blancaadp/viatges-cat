@@ -54,7 +54,7 @@ def test_build_site_genera_totes_les_pagines(site):
     assert (site / ".nojekyll").exists()
     assert len(list((site / "viatge").iterdir())) == len(ROWS)
     index = (site / "index.html").read_text(encoding="utf-8")
-    assert 'href="/viatges-cat/estil.css"' in index
+    assert 'href="/viatges-cat/estil.css?v=' in index  # amb versió per a la memòria cau
     assert "Despesa per any" in index
 
 
@@ -77,3 +77,11 @@ def test_pagina_de_persones(site):
     assert "/viatges-cat/persona/persona-b/" in page
     person = (site / "persona" / "persona-b" / "index.html").read_text(encoding="utf-8")
     assert "racc-833" in person and "racc-834" in person
+
+
+def test_cercador_de_persones_inclou_variants_i_carrecs(site):
+    page = (site / "persones" / "index.html").read_text(encoding="utf-8")
+    assert 'id="cerca-persona"' in page
+    assert 'data-cerca="persona b' in page  # nom en minúscules i sense accents
+    home = (site / "index.html").read_text(encoding="utf-8")
+    assert 'action="/viatges-cat/persones/"' in home

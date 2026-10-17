@@ -134,6 +134,14 @@ html.js .panel-title { margin-top: 8px; }
 table.data .meta { display: block; color: var(--muted); font-size: 0.82rem; }
 .person-trips .badge { margin-left: 8px; }
 
+/* Cercadors */
+.filters.tight { margin: 12px 0 8px; }
+.more { text-align: center; margin: 16px 0 0; }
+.home-search { margin: 20px 0 0; max-width: 34rem; }
+.home-search label { display: block; font-size: 0.9rem; color: var(--ink-2); margin-bottom: 4px; }
+.home-search-row { display: flex; gap: 8px; }
+.home-search input { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--axis); border-radius: 8px; padding: 8px 12px; min-height: 42px; }
+
 /* Tooltip */
 .tooltip { position: fixed; z-index: 20; pointer-events: none; background: var(--ink); color: var(--page); font-size: 0.85rem; padding: 6px 10px; border-radius: 6px; max-width: 280px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); }
 
@@ -196,7 +204,10 @@ code { font-size: 0.9em; }
   .chart .tick, .chart .value { font-size: 20px; }
   .chart .tick.x { font-size: 17px; }
   /* Explorador: cada viatge passa a ser una fitxa compacta */
-  .table-wrap { overflow: visible; }
+  .table-wrap:has(.trips) { overflow: visible; }
+  /* Persones: en mòbil només nom, total i darrer viatge */
+  .people th:nth-child(2), .people td:nth-child(2), .people th:nth-child(4), .people td:nth-child(4) { display: none; }
+  .people th, .people td { padding-left: 6px; padding-right: 6px; }
   .trips thead { display: none; }
   .trips, .trips tbody { display: block; }
   .trips tr { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 12px 14px; border-bottom: 1px solid var(--grid); }
