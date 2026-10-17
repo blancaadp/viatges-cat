@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ persona }} · Viatges dels alts càrrecs{% endblock %}
+{% block description %}Viatges a l'estranger de {{ persona }} publicats per la Generalitat de Catalunya.{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="{{ base }}persones/">← Totes les persones</a></p>
+<h1>{{ persona }}</h1>
+{% if variants | length > 1 %}
+<p class="muted">El nom apareix escrit com: {{ variants | join(" · ") }}.</p>
+{% endif %}
+
+<section class="kpis" aria-label="Xifres">
+  {% for label, value in kpis %}
+  <div class="kpi"><div class="kpi-label">{{ label }}</div><div class="kpi-value">{{ value }}</div></div>
+  {% endfor %}
+</section>
+{% if n_no_compten %}
+<p class="note">{{ n_no_compten }} {{ "registre no compta" if n_no_compten == 1 else "registres no compten" }} a
+  les xifres perquè {{ "és un duplicat o té" if n_no_compten == 1 else "són duplicats o tenen" }} una durada anòmala.
+  <a href="{{ base }}metodologia/">Per què?</a></p>
+{% endif %}
+
+<div class="grid-2">
+  <section class="card">
+    <h2>Càrrecs</h2>
+    <table class="data compact">
+      <tbody>
+        {% for carrec, des_de, fins, n in roles %}
+        <tr><td>{{ carrec }}<span class="meta">{{ des_de }}{% if fins != des_de %} – {{ fins }}{% endif %} · {{ n }} {{ "viatge" if n == 1 else "viatges" }}</span></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  <section class="card">
+    <h2>Països</h2>
+    {% if countries %}
+    <table class="data compact">
+      <tbody>
+        {% for name, n in countries %}<tr><th scope="row">{{ name }}</th><td class="num">{{ n }} {{ "viatge" if n == 1 else "viatges" }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">Cap destinació amb país identificat.</p>{% endif %}
+  </section>
+</div>
+
+<section class="card">
+  <h2>Viatges</h2>
+  <div class="table-wrap flat">
+    <table class="data trips person-trips">
+      <thead><tr><th scope="col">Data</th><th scope="col">Destinació</th><th scope="col" class="num">Dies</th><th scope="col" class="num">Import</th></tr></thead>
+      <tbody>
+        {% for t in trips %}
+        <tr>
+          <td class="num">{{ t.data }}</td>
+          <td><a href="{{ base }}viatge/{{ t.id }}/">{{ t.destinacio }}</a>{% for m in t.marques %}<span class="badge">{{ m }}</span>{% endfor %}</td>
+          <td class="num">{{ t.dies }}</td>
+          <td class="num">{{ t.total }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -32,7 +32,7 @@
   const trips = data.rows.map((r) => {
     const t = Object.fromEntries(data.columns.map((c) => [c, r[idx[c]]]));
     t.paisos = (t.paisos_iso2 || "").split(";").filter(Boolean);
-    t.text = norm([t.nom, t.carrec, t.destinacio, t.motiu, t.paisos.map((p) => data.paisos[p]).join(" ")].join(" "));
+    t.text = norm([t.nom, t.persona, t.carrec, t.destinacio, t.motiu, t.paisos.map((p) => data.paisos[p]).join(" ")].join(" "));
     return t;
   });
 
@@ -90,7 +90,7 @@
     tbody.innerHTML = slice.map((t) => `
       <tr>
         <td class="num">${date(t.data_inici_iso)}</td>
-        <td><a href="${base}viatge/${encodeURIComponent(t.id)}/">${esc(t.nom)}</a><span class="meta">${esc(t.carrec)}</span></td>
+        <td><a href="${base}viatge/${encodeURIComponent(t.id)}/">${esc(t.persona || t.nom)}</a><span class="meta">${esc(t.carrec)}</span></td>
         <td>${esc(t.destinacio)}<span class="meta">${badges(t)}</span></td>
         <td class="num">${t.durada_dies ?? "—"}</td>
         <td class="num">${t.total_eur == null ? "—" : eur.format(t.total_eur)}</td>

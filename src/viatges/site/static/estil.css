@@ -123,6 +123,17 @@ a.bar-label { color: var(--link); }
 .bar-fill { height: 14px; min-width: 2px; width: calc((100% - 4.5rem) * var(--p) / 100); background: var(--series-1); border-radius: 0 4px 4px 0; flex: 0 0 auto; }
 .bar-value { font-size: 0.85rem; color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
+/* Pestanyes (sense JS: amagades i es veuen tots els panells) */
+.tablist { display: none; gap: 4px; margin: 12px 0 4px; padding: 3px; background: color-mix(in srgb, var(--ink) 6%, transparent); border-radius: 8px; width: fit-content; max-width: 100%; }
+html.js .tablist { display: inline-flex; }
+.tablist [role="tab"] { font: inherit; font-size: 0.9rem; border: 0; background: transparent; color: var(--ink-2); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.tablist [role="tab"][aria-selected="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+html.js .panel-title { margin-top: 8px; }
+.bars.wide li { grid-template-columns: minmax(9rem, 32%) 1fr; }
+.table-wrap.flat { border: 0; border-radius: 0; background: transparent; }
+table.data .meta { display: block; color: var(--muted); font-size: 0.82rem; }
+.person-trips .badge { margin-left: 8px; }
+
 /* Tooltip */
 .tooltip { position: fixed; z-index: 20; pointer-events: none; background: var(--ink); color: var(--page); font-size: 0.85rem; padding: 6px 10px; border-radius: 6px; max-width: 280px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); }
 

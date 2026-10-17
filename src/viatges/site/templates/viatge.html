@@ -4,7 +4,7 @@
 {% block content %}
 <p class="crumbs"><a href="{{ base }}viatges/">← Tots els viatges</a></p>
 <h1>{{ v.destinacio }}</h1>
-<p class="lead"><strong>{{ v.nom }}</strong> · {{ v.carrec }}<br>
+<p class="lead"><strong><a href="{{ base }}persona/{{ v.persona_id }}/">{{ v.nom }}</a></strong> · {{ v.carrec }}<br>
   <span class="muted">{{ v.departament }}{% if v.unitat_organica | text and v.unitat_organica != v.departament %} · {{ v.unitat_organica }}{% endif %}</span></p>
 
 {% if marks %}

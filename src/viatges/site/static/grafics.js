@@ -1,3 +1,28 @@
+// Pestanyes: sense JavaScript es veuen tots els panells; amb JavaScript, només el triat.
+document.documentElement.classList.add("js");
+for (const list of document.querySelectorAll('[role="tablist"]')) {
+  const tabs = [...list.querySelectorAll('[role="tab"]')];
+  const select = (tab) => {
+    for (const t of tabs) {
+      const on = t === tab;
+      t.setAttribute("aria-selected", on);
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    }
+  };
+  tabs.forEach((tab, i) => {
+    tab.addEventListener("click", () => select(tab));
+    tab.addEventListener("keydown", (e) => {
+      const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (!step) return;
+      const next = tabs[(i + step + tabs.length) % tabs.length];
+      next.focus();
+      select(next);
+    });
+  });
+  select(tabs.find((t) => t.getAttribute("aria-selected") === "true") || tabs[0]);
+}
+
 // Tooltip compartit per a tots els elements amb `data-tip` (ratolí, tacte i teclat).
 (() => {
   const tip = document.querySelector(".tooltip");

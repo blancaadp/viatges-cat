@@ -236,7 +236,7 @@ def home_context(data: SiteData, base: str) -> dict:
         name = names.get(iso, iso)
         tip = f"{name}: {fmt_int(n)} viatges"
         country_rows.append(BarRow(name, float(n), fmt_int(n), tip, f"{base}viatges/?pais={iso}"))
-    persones = v["nom"].map(_key).nunique()
+    persones = v["persona_id"].nunique()
     return {
         "kpis": [
             ("Despesa total", fmt_compact_eur(v["total_eur"].sum())),
@@ -258,7 +258,8 @@ def home_context(data: SiteData, base: str) -> dict:
 def explorer_payload(data: SiteData) -> dict:
     """Dades compactes per a l'explorador (llista de columnes + files)."""
     v = data.viatges.sort_values("data_inici_iso", ascending=False)
-    columns = ["id", "data_inici_iso", "data_fi_iso", "durada_dies", "nom", "carrec", "ambit",
+    columns = ["id", "data_inici_iso", "data_fi_iso", "durada_dies", "nom", "persona",
+               "persona_id", "carrec", "ambit",
                "destinacio", "paisos_iso2", "motiu", "total_eur", "exclos_analisi",
                "flag_duplicat", "motiu_import_zero"]  # fmt: skip
     rows = []
@@ -272,6 +273,136 @@ def explorer_payload(data: SiteData) -> dict:
             row.append(value)
         rows.append(row)
     return {"columns": columns, "rows": rows, "paisos": country_names(data.trams)}
+
+
+MIN_TRIPS_DAILY = 3  # mínim de viatges per entrar al rànquing de despesa diària
+
+
+def people_table(data: SiteData) -> pd.DataFrame:
+    """Una fila per persona, amb els viatges que compten a les xifres (sense duplicats ni p99).
+
+    La despesa diària és la despesa total dividida pels dies totals de viatge, comptant
+    només els viatges amb import i durada coneguts.
+    """
+    v = analysis_set(data.viatges)
+    known = v[v["total_eur"].notna() & v["durada_dies"].notna()]
+    latest = v.sort_values("data_inici_iso").groupby("persona_id").last()
+    table = pd.DataFrame(
+        {
+            "persona": latest["persona"],
+            "carrec": latest["carrec"],
+            "ambit": latest["ambit"],
+            "viatges": v.groupby("persona_id").size(),
+            "total": v.groupby("persona_id")["total_eur"].sum(),
+            "dies": v.groupby("persona_id")["durada_dies"].sum(),
+            "total_conegut": known.groupby("persona_id")["total_eur"].sum(),
+            "dies_coneguts": known.groupby("persona_id")["durada_dies"].sum(),
+            "primer": v.groupby("persona_id")["data_inici_iso"].min(),
+            "darrer": v.groupby("persona_id")["data_inici_iso"].max(),
+        }
+    )
+    table["diaria"] = table["total_conegut"] / table["dies_coneguts"]
+    return table.sort_values("total", ascending=False)
+
+
+def people_context(data: SiteData, base: str) -> dict:
+    table = people_table(data)
+
+    def rows(column: str, frame: pd.DataFrame, n: int = 15) -> list[dict]:
+        top = frame.sort_values(column, ascending=False).head(n)
+        return bar_rows(
+            [
+                BarRow(
+                    r.persona,
+                    float(getattr(r, column)),
+                    fmt_eur(getattr(r, column)),
+                    f"{r.persona}: {fmt_eur(r.total)} en {fmt_int(r.viatges)} viatges i "
+                    f"{fmt_int(r.dies)} dies ({fmt_eur(r.diaria)} / dia)",
+                    f"{base}persona/{pid}/",
+                )
+                for pid, r in zip(top.index, top.itertuples(), strict=True)
+            ]
+        )
+
+    daily = table[(table["viatges"] >= MIN_TRIPS_DAILY) & table["diaria"].notna()]
+    return {
+        "total_rows": rows("total", table),
+        "daily_rows": rows("diaria", daily),
+        "min_trips": MIN_TRIPS_DAILY,
+        "n_persones": len(table),
+        "people": [
+            {
+                "id": pid,
+                "persona": r.persona,
+                "carrec": r.carrec,
+                "viatges": fmt_int(r.viatges),
+                "dies": fmt_int(r.dies),
+                "total": fmt_eur(r.total),
+                "diaria": fmt_eur(r.diaria),
+                "total_num": r.total,
+                "diaria_num": None if math.isnan(r.diaria) else r.diaria,
+            }
+            for pid, r in zip(table.index, table.itertuples(), strict=True)
+        ],
+    }
+
+
+def person_context(pid: str, data: SiteData, table: pd.DataFrame, base: str) -> dict:
+    trips = data.viatges[data.viatges["persona_id"] == pid].sort_values(
+        "data_inici_iso", ascending=False
+    )
+    counted = analysis_set(trips)
+    summary = table.loc[pid] if pid in table.index else None
+    roles = (
+        trips.assign(carrec_net=trips["carrec"].map(lambda c: " ".join(str(c).split())))
+        .groupby(_key_series(trips["carrec"]))
+        .agg(carrec=("carrec_net", "first"), des_de=("data_inici_iso", "min"),
+             fins=("data_inici_iso", "max"), n=("id", "size"))
+        .sort_values("des_de", ascending=False)
+    )  # fmt: skip
+    names = country_names(data.trams)
+    trams = data.trams[data.trams["id"].isin(counted["id"])]
+    countries = trams[trams["iso2"].notna()].drop_duplicates(["id", "iso2"]).groupby("iso2").size()
+    return {
+        "persona": trips["persona"].iloc[0],
+        "pid": pid,
+        "variants": sorted(set(trips["nom"].map(lambda n: " ".join(str(n).split())))),
+        "roles": [
+            (r.carrec, fmt_date(r.des_de), fmt_date(r.fins), r.n) for r in roles.itertuples()
+        ],
+        "kpis": [
+            ("Despesa total", fmt_eur(summary["total"]) if summary is not None else "—"),
+            ("Viatges", fmt_int(len(counted))),
+            ("Dies de viatge", fmt_int(counted["durada_dies"].sum())),
+            ("Despesa diària", fmt_eur(summary["diaria"]) if summary is not None else "—"),
+        ],
+        "countries": [
+            (names.get(iso, iso), n) for iso, n in countries.sort_values(ascending=False).items()
+        ],
+        "trips": [
+            {
+                "id": t.id,
+                "data": fmt_date(t.data_inici_iso),
+                "destinacio": t.destinacio,
+                "dies": "—" if pd.isna(t.durada_dies) else fmt_int(t.durada_dies),
+                "total": fmt_eur(t.total_eur),
+                "marques": [
+                    text
+                    for flag, text in (
+                        ("exclos_analisi", "Durada anòmala"),
+                        ("flag_duplicat", "Duplicat"),
+                    )
+                    if bool(getattr(t, flag))
+                ],
+            }
+            for t in trips.itertuples()
+        ],
+        "n_no_compten": len(trips) - len(counted),
+    }
+
+
+def _key_series(s: pd.Series) -> pd.Series:
+    return s.map(_key)
 
 
 FLAG_TEXTS = {
@@ -390,6 +521,11 @@ def build_site(db_path: Path, manual_dir: Path, out_dir: Path, base: str = "/") 
            llindar=int(data.viatges.loc[data.viatges["exclos_analisi"], "durada_dies"].min() - 1)
            if data.viatges["exclos_analisi"].any() else None)  # fmt: skip
     render("404.html", "404.html", page=None)
+    render("persones.html", "persones/index.html", page="persones", **people_context(data, base))
+    table = people_table(data)
+    for pid in data.viatges["persona_id"].unique():
+        render("persona.html", f"persona/{pid}/index.html", page="persones",
+               **person_context(pid, data, table, base))  # fmt: skip
     for _, row in data.viatges.iterrows():
         render("viatge.html", f"viatge/{row['id']}/index.html", page="viatges",
                **trip_context(row, data, base))  # fmt: skip

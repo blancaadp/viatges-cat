@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Persones · Viatges dels alts càrrecs{% endblock %}
+{% block content %}
+<h1>Persones</h1>
+<p class="lead">Qui ha acumulat més despesa en viatges i qui té una despesa diària més alta. Els noms
+  escrits de manera diferent (amb o sense accents, amb la «i» entre cognoms…) s'han unificat.</p>
+
+<section class="card">
+  <h2>Les 15 persones amb més despesa</h2>
+  <div class="tablist" role="tablist" aria-label="Mesura">
+    <button type="button" role="tab" id="tab-total" aria-controls="panell-total" aria-selected="true">Despesa total</button>
+    <button type="button" role="tab" id="tab-diaria" aria-controls="panell-diaria" aria-selected="false" tabindex="-1">Despesa mitjana diària</button>
+  </div>
+  <div role="tabpanel" id="panell-total" aria-labelledby="tab-total">
+    <p class="sub panel-title">Despesa total del període.</p>
+    <ul class="bars wide">
+      {% for r in total_rows %}
+      <li tabindex="0" data-tip="{{ r.tip }}">
+        <a class="bar-label" href="{{ r.href }}">{{ r.label }}</a>
+        <span class="bar-track"><span class="bar-fill" style="--p: {{ '%.1f' % r.pct }}"></span><span class="bar-value">{{ r.display }}</span></span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div role="tabpanel" id="panell-diaria" aria-labelledby="tab-diaria">
+    <p class="sub panel-title">Euros per dia: despesa total dividida pels dies de viatge. Només persones amb {{ min_trips }} viatges o més,
+      perquè amb un o dos viatges la mitjana depèn massa d'un sol cas.</p>
+    <ul class="bars wide">
+      {% for r in daily_rows %}
+      <li tabindex="0" data-tip="{{ r.tip }}">
+        <a class="bar-label" href="{{ r.href }}">{{ r.label }}</a>
+        <span class="bar-track"><span class="bar-fill" style="--p: {{ '%.1f' % r.pct }}"></span><span class="bar-value">{{ r.display }}</span></span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <p class="note small">L'import és per registre: en els viatges del president i dels consellers sovint inclou la
+    despesa de tota la comitiva, i per això la seva despesa diària és més alta.
+    <a href="{{ base }}metodologia/">Més detalls</a>.</p>
+</section>
+
+<section class="card">
+  <h2>Totes les persones ({{ n_persones }})</h2>
+  <p class="sub">Ordenades per despesa total. El càrrec és el del viatge més recent.</p>
+  <div class="table-wrap flat">
+    <table class="data people">
+      <thead>
+        <tr>
+          <th scope="col">Persona</th>
+          <th scope="col" class="num">Viatges</th>
+          <th scope="col" class="num">Dies</th>
+          <th scope="col" class="num">Total</th>
+          <th scope="col" class="num">Per dia</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in people %}
+        <tr>
+          <td><a href="{{ base }}persona/{{ p.id }}/">{{ p.persona }}</a><span class="meta">{{ p.carrec }}</span></td>
+          <td class="num">{{ p.viatges }}</td>
+          <td class="num">{{ p.dies }}</td>
+          <td class="num">{{ p.total }}</td>
+          <td class="num">{{ p.diaria }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

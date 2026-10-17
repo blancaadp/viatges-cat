@@ -83,6 +83,12 @@ mitjançant `data/manual/departaments.csv`. De passada, corregir variants tipogr
 agrupar; no fusionar noms diferents sense revisió. Afegir una `persona_id` estable via
 `data/manual/persones.csv` només si es detecten variants de la mateixa persona.
 
+**Implementat (2026-10-17):** `persona_id` es calcula amb una clau sense accents, majúscules
+ni partícules entre cognoms («i», «de»…), que uneix 13 persones automàticament. Els 7 casos
+restants (segon cognom absent, nom abreujat, nom de pila en castellà) són a
+`data/manual/persones.csv` amb el motiu; només s'hi afegeixen quan el càrrec ho confirma.
+`persona` és el nom per mostrar; `nom` es conserva tal com ve. 285 noms → 265 persones.
+
 ### 7. Camps de text amb farciment
 
 | Camp | Regla |

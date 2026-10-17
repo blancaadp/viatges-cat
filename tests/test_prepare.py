@@ -3,6 +3,7 @@ import pytest
 from conftest import frame
 
 from viatges.prepare import (
+    add_persona,
     annotate_corrections,
     build_trams,
     classify_zero_total,
@@ -10,6 +11,7 @@ from viatges.prepare import (
     normalize_place,
     parse_amounts,
     parse_dates,
+    person_key,
     prepare,
     run_prepare,
     split_trams,
@@ -241,3 +243,44 @@ def test_build_trams_descarta_el_tram_repetit_consecutiu(manual):
     assert trams.loc[trams["id"] == "a", "iso2"].tolist() == ["JP"]
     # una tornada a la mateixa ciutat, no consecutiva, es conserva
     assert trams.loc[trams["id"] == "b", "ciutat"].tolist() == ["Tòquio", "Perpinyà", "Tòquio"]
+
+
+def test_person_key_unifica_variants_d_escriptura():
+    assert person_key("Natàlia Mas i Guix") == person_key("Natàlia Mas Guix")
+    assert person_key("Míriam Moysset i Gil") == person_key("Miriam Moysset i Gil")
+    assert person_key("Alfonso González Bondía") == person_key("Alfonso González Bondia")
+    assert person_key("Alba Vergés i Bosch") != person_key("Núria Vergés Bosch")
+
+
+def test_add_persona_aplica_el_diccionari_i_no_toca_el_nom():
+    df = pd.DataFrame(
+        {
+            "nom": ["Joan Romero", "Joan Romero", "Joan Romero Circuns", "Elsa Artadi i Vila",
+                    "Elsa Artadi Vila", "Elsa Artadi i Vila"],
+            "data_inici": ["2018-10-30", "2019-01-01", "2019-03-31", "2018-01-01", "2018-02-01",
+                           "2018-03-01"],
+        }
+    )  # fmt: skip
+    persones = pd.DataFrame(
+        {"variant": ["Joan Romero"], "nom": ["Joan Romero Circuns"], "motiu": ["test"]}
+    )
+    out = add_persona(df, persones)
+    assert out["persona_id"].nunique() == 2
+    assert set(out.loc[out["nom"].str.startswith("Joan"), "persona"]) == {"Joan Romero Circuns"}
+    # sense entrada al diccionari: la variant més freqüent
+    assert set(out.loc[out["nom"].str.startswith("Elsa"), "persona"]) == {"Elsa Artadi i Vila"}
+    assert out["nom"].tolist() == df["nom"].tolist()
+
+
+def test_mark_duplicates_fa_servir_la_persona_unificada():
+    df = pd.DataFrame(
+        {
+            "id": ["racc-1", "racc-2"],
+            "nom": ["Joan Romero", "Joan Romero Circuns"],
+            "persona_id": ["joan-romero-circuns"] * 2,
+            "data_inici_iso": ["2019-03-10"] * 2,
+            "total_eur": [100.0, 100.0],
+        }
+    )
+    out = mark_duplicates(df).set_index("id")
+    assert out.loc["racc-2", "flag_duplicat"]

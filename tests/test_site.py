@@ -49,6 +49,8 @@ def test_build_site_genera_totes_les_pagines(site):
     assert (site / "index.html").exists()
     assert (site / "viatges" / "index.html").exists()
     assert (site / "metodologia" / "index.html").exists()
+    assert (site / "persones" / "index.html").exists()
+    assert (site / "persona" / "persona-b" / "index.html").exists()
     assert (site / ".nojekyll").exists()
     assert len(list((site / "viatge").iterdir())) == len(ROWS)
     index = (site / "index.html").read_text(encoding="utf-8")
@@ -67,3 +69,11 @@ def test_fitxa_mostra_la_nota_de_revisio(site):
     page = (site / "viatge" / "racc-X" / "index.html").read_text(encoding="utf-8")
     assert "Revisió manual" in page
     assert "Brussels (Bèlgica)" in page
+
+
+def test_pagina_de_persones(site):
+    page = (site / "persones" / "index.html").read_text(encoding="utf-8")
+    assert 'role="tablist"' in page
+    assert "/viatges-cat/persona/persona-b/" in page
+    person = (site / "persona" / "persona-b" / "index.html").read_text(encoding="utf-8")
+    assert "racc-833" in person and "racc-834" in person

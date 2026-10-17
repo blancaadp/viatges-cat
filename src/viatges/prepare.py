@@ -17,6 +17,7 @@ import logging
 import re
 import unicodedata
 from dataclasses import dataclass
+from dataclasses import field as dataclass_field
 from pathlib import Path
 
 import pandas as pd
@@ -51,6 +52,9 @@ class Manual:
     ciutats: pd.DataFrame  # variant, ciutat, iso2
     departaments: pd.DataFrame  # departament, ambit
     correccions: pd.DataFrame  # id, camp, valor_nou, motiu, font
+    persones: pd.DataFrame = dataclass_field(  # variant, nom, motiu
+        default_factory=lambda: pd.DataFrame(columns=["variant", "nom", "motiu"])
+    )
 
 
 def load_manual(manual_dir: Path) -> Manual:
@@ -62,6 +66,7 @@ def load_manual(manual_dir: Path) -> Manual:
         ciutats=read("ciutats.csv"),
         departaments=read("departaments.csv"),
         correccions=read("correccions.csv"),
+        persones=read("persones.csv"),
     )
 
 
@@ -204,7 +209,10 @@ def mark_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     if unknown:
         raise ValueError(f"Decisió de desdoblament desconeguda: {sorted(unknown)}")
 
-    out["nom_clau"] = out["nom"].map(lambda s: " ".join(str(s).split()).casefold())
+    if "persona_id" in out:
+        out["nom_clau"] = out["persona_id"]
+    else:
+        out["nom_clau"] = out["nom"].map(person_key)
     order = pd.concat([out, _id_priority(out["id"])], axis=1).sort_values(
         ["nom_clau", "data_inici_iso", "rank", "num"]
     )
@@ -378,9 +386,54 @@ def add_ambit(df: pd.DataFrame, departaments: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Persones
+# ---------------------------------------------------------------------------
+
+_NAME_PARTICLES = {"i", "y", "de", "del", "la"}
+
+
+def person_key(nom: str) -> str:
+    """Clau per unir noms de la mateixa persona escrits de manera diferent.
+
+    Sense accents, majúscules ni puntuació, i sense partícules entre cognoms:
+    "Natàlia Mas i Guix" i "Natàlia Mas Guix" donen la mateixa clau.
+    """
+    plain = strip_accents(str(nom)).replace("·", "")
+    words = re.sub(r"[^a-z ]", " ", plain).split()
+    return " ".join(w for w in words if w not in _NAME_PARTICLES)
+
+
+def add_persona(df: pd.DataFrame, persones: pd.DataFrame) -> pd.DataFrame:
+    """Afegeix `persona_id` (estable) i `persona` (nom per mostrar). El `nom` no es toca.
+
+    Els casos que la clau no resol (un cognom que falta, un nom abreujat…) es resolen amb
+    `data/manual/persones.csv`. Com a nom per mostrar es fa servir el del diccionari o, si no
+    hi és, la variant més freqüent.
+    """
+    manual = {person_key(r.variant): person_key(r.nom) for r in persones.itertuples()}
+    keys = df["nom"].map(person_key).map(lambda k: manual.get(k, k))
+    out = df.copy()
+    out["persona_id"] = keys.str.replace(" ", "-")
+    names = df["nom"].map(lambda n: " ".join(str(n).split()))
+    counts = (
+        pd.DataFrame({"id": out["persona_id"], "nom": names, "data": df.get("data_inici")})
+        .groupby(["id", "nom"])
+        .agg(n=("nom", "size"), data=("data", "max"))
+        .reset_index()
+        .sort_values(["n", "data"], ascending=False)
+    )
+    display = counts.drop_duplicates("id").set_index("id")["nom"]
+    # Si la persona és al diccionari manual, mana el nom que hi consta
+    canonical = {person_key(r.nom).replace(" ", "-"): r.nom for r in persones.itertuples()}
+    out["persona"] = out["persona_id"].map(lambda k: canonical.get(k) or display[k])
+    return out
+
+
 def prepare(df: pd.DataFrame, manual: Manual) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Retorna (viatges, trams) preparats per a l'anàlisi."""
     viatges = annotate_corrections(df, manual.correccions)
+    viatges = add_persona(viatges, manual.persones)
     viatges = parse_amounts(viatges)
     viatges = parse_dates(viatges)
     viatges = mark_duplicates(viatges)
