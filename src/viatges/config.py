@@ -28,3 +28,12 @@ def app_secret() -> str | None:
     """Clau secreta de Socrata des de .env o variables d'entorn (None si no n'hi ha)."""
     load_dotenv(ROOT / ".env")
     return os.getenv("SODA_APP_SECRET") or None
+
+
+def turso_credentials() -> tuple[str, str]:
+    """URL i token de Turso des de .env o variables d'entorn (TURSO_URL, TURSO_TOKEN)."""
+    load_dotenv(ROOT / ".env")
+    url, token = os.getenv("TURSO_URL"), os.getenv("TURSO_TOKEN")
+    if not url or not token:
+        raise RuntimeError("Falten TURSO_URL i TURSO_TOKEN al fitxer .env o a l'entorn")
+    return url, token

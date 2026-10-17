@@ -1,10 +1,11 @@
 """Fixtures amb registres reals del dataset (retallats), inclosos els seus problemes."""
 
-import json
+import hashlib
 
 import pandas as pd
 import pytest
 
+from viatges.ingest import _write_json
 from viatges.prepare import Manual
 from viatges.schema import COLUMNS
 
@@ -61,13 +62,17 @@ ROWS = [
 
 
 def write_snapshot(raw_dir, name: str, rows: list[dict], downloaded_at: str = "x"):
-    """Escriu una instantània com les que deixa `viatges ingest`."""
+    """Escriu una instantània com les que deixa `viatges ingest` (mateix format i hash)."""
     d = raw_dir / name
     d.mkdir(parents=True)
-    (d / "rows.json").write_text(json.dumps(rows), encoding="utf-8")
-    (d / "metadata.json").write_text(json.dumps(make_metadata()), encoding="utf-8")
-    manifest = {"downloaded_at": downloaded_at, "n_rows": len(rows)}
-    (d / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    raw = _write_json(d / "rows.json", rows)
+    _write_json(d / "metadata.json", make_metadata())
+    manifest = {
+        "downloaded_at": downloaded_at,
+        "n_rows": len(rows),
+        "sha256_rows": hashlib.sha256(raw).hexdigest(),
+    }
+    _write_json(d / "manifest.json", manifest)
     return d
 
 

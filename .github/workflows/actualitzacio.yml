@@ -1,0 +1,50 @@
+# Actualització setmanal (ADR 0005): recupera l'arxiu de Turso, descarrega una instantània
+# nova, prepara les dades, reconstrueix la base de dades i la torna a pujar a Turso.
+name: Actualització setmanal
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # dilluns a les 6:00 UTC
+  workflow_dispatch: {}
+
+concurrency:
+  group: actualitzacio
+  cancel-in-progress: false
+
+permissions:
+  contents: write # per fer commit dels informes
+
+jobs:
+  actualitzar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TURSO_URL: ${{ secrets.TURSO_URL }}
+      TURSO_TOKEN: ${{ secrets.TURSO_TOKEN }}
+      SODA_APP_TOKEN: ${{ secrets.SODA_APP_TOKEN }}
+      SODA_APP_SECRET: ${{ secrets.SODA_APP_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+
+      - name: Recupera l'arxiu d'instantànies de Turso
+        run: uv run viatges pull
+
+      - name: Descarrega, compara, prepara i reconstrueix
+        run: uv run viatges update
+
+      - name: Puja a Turso
+        run: uv run viatges push
+
+      - name: Desa els informes al repositori
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/
+          if git diff --cached --quiet; then
+            echo "Cap informe nou"
+          else
+            git commit -m "Actualització setmanal de les dades ($(date -u +%Y-%m-%d))"
+            git push
+          fi

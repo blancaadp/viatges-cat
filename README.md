@@ -9,7 +9,7 @@ Anàlisi independent dels viatges a l'estranger dels alts càrrecs i del persona
 
 ## Estat
 
-🚧 **Fase 3 — Automatització i còpia a una base de dades allotjada (Turso).**
+🚧 **Fase 3 — Automatització i còpia a Turso: codi fet, pendent de configurar el compte.**
 
 | Fase | Descripció | Estat |
 |------|------------|-------|
@@ -41,6 +41,8 @@ uv run viatges prepare        # genera data/processed/<instantània>/ i reports/
 uv run viatges changes        # compara les dues darreres instantànies -> reports/canvis/
 uv run viatges build          # reconstrueix data/viatges.sqlite a partir de totes les instantànies
 uv run viatges update         # ingest + changes + prepare + build
+uv run viatges pull           # recupera de Turso les instantànies que falten en local
+uv run viatges push           # puja instantànies noves i taules derivades a Turso
 uv run pytest                 # tests
 ```
 
@@ -56,12 +58,35 @@ src/viatges/
   prepare.py     preparació per a l'anàlisi (Fase 1, ADR 0004)
   changes.py     detecció de canvis entre instantànies (Fase 2, ADR 0003)
   store.py       base de dades SQLite derivada (Fase 2, ADR 0003)
-  cli.py         ordres `viatges ingest|profile|prepare|changes|build|update`
+  turso.py       còpia a Turso per HTTP (Fase 3, ADR 0005)
+  cli.py         ordres `viatges ingest|profile|prepare|changes|build|update|pull|push`
 data/manual/     diccionaris i anotacions manuals (versionats)
 docs/decisions/  registre de decisions d'arquitectura (ADR)
 reports/         informes generats
 notebooks/       exploració lliure (important el paquet)
 ```
+
+## Automatització i Turso
+
+Cada dilluns, el workflow [`actualitzacio.yml`](.github/workflows/actualitzacio.yml) executa
+`pull` → `update` → `push` i desa els informes a `reports/`. També es pot llançar a mà des de
+la pestanya *Actions* de GitHub.
+
+Configuració inicial (un sol cop):
+
+1. Crea un compte a [turso.tech](https://turso.tech) (pla gratuït) i instal·la la CLI:
+   `brew install tursodatabase/tap/turso` i després `turso auth login`.
+2. Crea la base de dades i obtén-ne l'URL i un token de lectura i escriptura:
+   ```bash
+   turso db create viatges-cat
+   turso db show viatges-cat --url
+   turso db tokens create viatges-cat
+   ```
+3. Posa `TURSO_URL` i `TURSO_TOKEN` al fitxer `.env` i fes la primera càrrega des de local,
+   perquè l'arxiu de Turso comenci amb les instantànies que ja tens:
+   `uv run viatges build && uv run viatges push`.
+4. A GitHub, *Settings → Secrets and variables → Actions*, crea els secrets `TURSO_URL`,
+   `TURSO_TOKEN`, `SODA_APP_TOKEN` i `SODA_APP_SECRET` (o amb `gh secret set NOM`).
 
 ## Font de les dades
 
