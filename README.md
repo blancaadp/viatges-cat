@@ -9,14 +9,14 @@ Anàlisi independent dels viatges a l'estranger dels alts càrrecs i del persona
 
 ## Estat
 
-🚧 **Fase 3 — Automatització i còpia a Turso: Turso configurat, pendent dels secrets de GitHub.**
+🚧 **Fase 4 — Web pública.** Les dades s'actualitzen soles cada dilluns i es copien a Turso.
 
 | Fase | Descripció | Estat |
 |------|------------|-------|
 | 0 | Ingesta en cru via API SODA i inventari de qualitat | ✅ |
 | 1 | Preparació: dades tal com venen + marques, exclusió p99 de durada | ✅ |
 | 2 | Detecció de canvis entre instantànies i base de dades SQLite | ✅ |
-| 3 | Automatització setmanal (GitHub Actions) i còpia a Turso | ⏳ |
+| 3 | Automatització setmanal (GitHub Actions) i còpia a Turso | ✅ |
 | 4 | Web pública | ⏳ |
 | 5 | Model de cost esperat i viatges atípics | ⏳ |
 
