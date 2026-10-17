@@ -40,6 +40,7 @@ texto. Este documento fija qué hacer con cada uno.
 |---|---|---|---|
 | Fechas no legibles, fin < inicio, inicio futuro | 0 | Sin acción; test que falle si aparecen. | — |
 | Viajes de más de 21 días | 5 (racc-950, racc-340, racc-1364, racc-1699, racc-1148) | `flag_durada_sospitosa`. Excluidos de métricas por día (coste/día). Corrección solo vía `correcciones.csv` si el `motiu`/`agenda` deja clara la fecha real (p. ej. racc-1364, inauguración en Venecia: 17/04→19/09 parece un error de mes; racc-1148, Perpinyà con observación "Dia de feina" y total 0). | Casi seguro son erratas, pero corregir sin fuente sería inventar. |
+| Revisión 2026-10-17 | Los 5 casos eran errores de mes o de fecha de fin y se han corregido en `correcciones.csv` con la fuente de cada uno (agenda del propio registro, viajes de la misma persona que se solapan, fechas públicas del evento). racc-1699 tiene confianza media. |
 | Fecha con hora `T00:00:00.000` | todas | Guardar `data_inici`/`data_fi` como `date` sin hora. Duración = `data_fi − data_inici + 1`. | La hora no aporta información. |
 
 ### 3. Duplicados

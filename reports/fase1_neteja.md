@@ -3,7 +3,7 @@
 _Instantánea descargada el 2026-09-29T16:51:11.327707+00:00. Reglas: [ADR 0002](../docs/decisions/0002-reglas-de-limpieza.md)._
 
 - Viajes: **1511** · tramos de destino: **1733**
-- Correcciones manuales aplicadas: 18
+- Correcciones manuales aplicadas: 23
 - Ciudades distintas tras normalizar: 327 (antes 403)
 - Países distintos: 82
 - Departamentos sin ámbito asignado: 0
@@ -16,7 +16,7 @@ _Instantánea descargada el 2026-09-29T16:51:11.327707+00:00. Reglas: [ADR 0002]
 | flag_redondeig             |           2 |
 | flag_import_inconsistent   |           0 |
 | flag_import_incomplet      |          12 |
-| flag_durada_sospitosa      |           5 |
+| flag_durada_sospitosa      |           0 |
 | flag_duplicat              |          14 |
 | flag_possible_desdoblament |           2 |
 | flag_desti_sense_pais      |           0 |
