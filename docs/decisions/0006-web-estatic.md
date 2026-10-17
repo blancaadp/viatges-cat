@@ -32,5 +32,7 @@ publicació) només existeix a la nostra base de dades, no a Socrata.
   persones, destinacions i retard de publicació es poden afegir sense canviar
   l'arquitectura.
 - GitHub Pages en un repositori privat requereix un pla de pagament de GitHub. Amb el pla
-  gratuït, el repositori ha de ser públic.
+  gratuït, el repositori ha de ser públic. Mentre és privat, el web es genera igualment i
+  queda com a artefacte de cada execució; la publicació s'activa amb la variable
+  `PUBLICAR_WEB`.
 - Si en el futur volem consultes en directe o una API, Turso ja té les dades.

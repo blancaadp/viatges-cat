@@ -1,5 +1,10 @@
-# Publica el web a GitHub Pages (ADR 0006). S'executa després de cada actualització
-# setmanal, quan es canvia el codi a main i també a mà.
+# Genera el web (ADR 0006) després de cada actualització setmanal, quan es canvia el codi a
+# main i també a mà. El web generat queda com a artefacte de l'execució ("github-pages"),
+# descarregable des de la pestanya Actions.
+#
+# La publicació a GitHub Pages només s'executa si la variable del repositori
+# PUBLICAR_WEB val "true" (Settings → Secrets and variables → Actions → Variables).
+# GitHub Pages requereix que el repositori sigui públic o un pla de pagament.
 name: Web
 
 on:
@@ -51,6 +56,7 @@ jobs:
 
   publicar:
     needs: construir
+    if: vars.PUBLICAR_WEB == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

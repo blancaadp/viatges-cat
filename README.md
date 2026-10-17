@@ -93,9 +93,12 @@ Configuració inicial (un sol cop):
 
 ## Web
 
-El workflow [`web.yml`](.github/workflows/web.yml) genera el web i el publica a GitHub Pages
-després de cada actualització setmanal i de cada canvi al codi. Cal activar-ho un cop a
-*Settings → Pages → Build and deployment → Source: GitHub Actions*.
+El workflow [`web.yml`](.github/workflows/web.yml) genera el web després de cada
+actualització setmanal i de cada canvi al codi, i el deixa com a artefacte descarregable de
+l'execució. Per publicar-lo a GitHub Pages (cal que el repositori sigui públic):
+
+1. *Settings → Pages → Build and deployment → Source: GitHub Actions*.
+2. *Settings → Secrets and variables → Actions → Variables*: crea `PUBLICAR_WEB` = `true`.
 
 ## Font de les dades
 
