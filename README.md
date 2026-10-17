@@ -43,6 +43,8 @@ uv run viatges build          # reconstrueix data/viatges.sqlite a partir de tot
 uv run viatges update         # ingest + changes + prepare + build
 uv run viatges pull           # recupera de Turso les instantànies que falten en local
 uv run viatges push           # puja instantànies noves i taules derivades a Turso
+uv run viatges web            # genera el web estàtic a site/
+uv run python -m http.server 8000 --directory site   # previsualitza el web
 uv run pytest                 # tests
 ```
 
@@ -59,7 +61,8 @@ src/viatges/
   changes.py     detecció de canvis entre instantànies (Fase 2, ADR 0003)
   store.py       base de dades SQLite derivada (Fase 2, ADR 0003)
   turso.py       còpia a Turso per HTTP (Fase 3, ADR 0005)
-  cli.py         ordres `viatges ingest|profile|prepare|changes|build|update|pull|push`
+  site/          generador del web estàtic: plantilles, CSS i JS (Fase 4, ADR 0006)
+  cli.py         ordres `viatges ingest|profile|prepare|changes|build|update|pull|push|web`
 data/manual/     diccionaris i anotacions manuals (versionats)
 docs/decisions/  registre de decisions d'arquitectura (ADR)
 reports/         informes generats
@@ -87,6 +90,12 @@ Configuració inicial (un sol cop):
    `uv run viatges build && uv run viatges push`.
 4. A GitHub, *Settings → Secrets and variables → Actions*, crea els secrets `TURSO_URL`,
    `TURSO_TOKEN`, `SODA_APP_TOKEN` i `SODA_APP_SECRET` (o amb `gh secret set NOM`).
+
+## Web
+
+El workflow [`web.yml`](.github/workflows/web.yml) genera el web i el publica a GitHub Pages
+després de cada actualització setmanal i de cada canvi al codi. Cal activar-ho un cop a
+*Settings → Pages → Build and deployment → Source: GitHub Actions*.
 
 ## Font de les dades
 

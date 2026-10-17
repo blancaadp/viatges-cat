@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Metodologia · Viatges dels alts càrrecs{% endblock %}
+{% block content %}
+<article class="prose narrow">
+  <h1>Metodologia</h1>
+
+  <h2>D'on surten les dades</h2>
+  <p>Del conjunt <a href="{{ dataset_url }}">Viatges a l'estranger dels alts càrrecs i personal
+    directiu de la Generalitat de Catalunya</a>, publicat al portal de Dades Obertes de Catalunya.
+    Cada dilluns se'n descarrega una còpia completa i es compara amb l'anterior per detectar
+    registres nous, esborrats o modificats.</p>
+
+  <h2>Les dades, tal com venen</h2>
+  <p>Aquest web no corregeix cap valor. Els imports, les dates i els textos són els que publica la
+    Generalitat. Quan detectem un problema (un import incomplet, un duplicat, una data que sembla
+    errònia), el registre porta una <strong>marca</strong> que ho explica, però les xifres es calculen
+    amb el valor original.</p>
+
+  <h2>Què no compta a les xifres</h2>
+  <ul>
+    <li><strong>Viatges amb una durada anòmala.</strong> Excloem els viatges que duren més que el
+      99% de la resta{% if llindar %} (ara mateix, més de {{ llindar }} dies){% endif %}. Són
+      {{ n_exclosos }} registres i gairebé sempre són errors de data: per exemple, un viatge d'un dia
+      publicat amb una data de tornada dos mesos més tard.</li>
+    <li><strong>Duplicats.</strong> Alguns viatges s'han publicat dues vegades, amb identificadors
+      diferents. Comptem només el registre original.</li>
+  </ul>
+  <p>Tots dos tipus de registre continuen visibles a l'explorador i a les dades descarregables.</p>
+
+  <h2>Com llegir els imports</h2>
+  <ul>
+    <li>L'import és <strong>per registre</strong>, no per persona: alguns registres inclouen les
+      despeses de tota la comitiva i d'altres només les de qui viatja.</li>
+    <li>Un import de 0 € no sempre vol dir que el viatge fos gratuït. De vegades les despeses
+      s'imputen al registre d'una altra persona, les paga un tercer o encara s'estan tramitant;
+      quan les observacions ho diuen, el registre ho indica.</li>
+    <li>Els viatges de l'any en curs es van publicant amb retard: les xifres de l'any actual no són
+      definitives.</li>
+  </ul>
+
+  <h2>Destinacions i àmbits</h2>
+  <p>Les destinacions arriben en text lliure ("Brussels", "Brussel·les", "BRUSSEL·LES"…). Per poder
+    comptar per país, les normalitzem amb un diccionari. Els departaments canvien de nom a cada
+    legislatura, així que els agrupem en <strong>àmbits</strong> estables (Acció Exterior, Cultura,
+    Empresa…). El nom original es conserva sempre.</p>
+
+  <h2>Una dada atípica no és una irregularitat</h2>
+  <p>Un viatge car o llarg pot tenir una explicació perfectament raonable. Aquest web vol facilitar
+    l'accés a unes dades que ja són públiques, no assenyalar ningú.</p>
+
+  <h2>Codi i dades</h2>
+  <p>Pots <a href="{{ base }}dades/viatges.csv">descarregar els viatges</a> i
+    <a href="{{ base }}dades/trams.csv">les destinacions normalitzades</a> en CSV. Les decisions
+    de disseny estan documentades al repositori del projecte.</p>
+</article>
+{% endblock %}

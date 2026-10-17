@@ -21,3 +21,7 @@ __pycache__/
 
 # R
 .Rhistory
+
+# Web generat (`uv run viatges web`)
+/site/
+/site.tmp/

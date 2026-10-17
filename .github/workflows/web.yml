@@ -1,0 +1,60 @@
+# Publica el web a GitHub Pages (ADR 0006). S'executa després de cada actualització
+# setmanal, quan es canvia el codi a main i també a mà.
+name: Web
+
+on:
+  workflow_run:
+    workflows: ["Actualització setmanal"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - "src/viatges/**"
+      - "data/manual/**"
+      - ".github/workflows/web.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  construir:
+    # Després d'una actualització setmanal fallida no es publica res
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TURSO_URL: ${{ secrets.TURSO_URL }}
+      TURSO_TOKEN: ${{ secrets.TURSO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+
+      - name: Recupera les instantànies i reconstrueix la base de dades
+        run: |
+          uv run viatges pull
+          uv run viatges build
+
+      - name: Genera el web
+        run: uv run viatges web --base "/${{ github.event.repository.name }}/"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

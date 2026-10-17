@@ -12,6 +12,7 @@ from viatges.changes import read_manifest, run_changes
 from viatges.ingest import latest_snapshot, list_snapshots, run_ingest
 from viatges.prepare import run_prepare
 from viatges.profiling import run_profile
+from viatges.site import build_site
 from viatges.store import build_database
 from viatges.turso import TursoClient, pull, push
 
@@ -68,6 +69,8 @@ def main(argv: list[str] | None = None) -> None:
     sub.add_parser("update", help="Ingesta + canvis + preparació + base de dades")
     sub.add_parser("push", help="Puja instantànies i taules a Turso (Fase 3)")
     sub.add_parser("pull", help="Recupera de Turso les instantànies que falten en local")
+    web = sub.add_parser("web", help="Genera el web estàtic a site/ (Fase 4)")
+    web.add_argument("--base", default="/", help="Camí base de l'URL (p. ex. /viatges-cat/)")
     args = parser.parse_args(argv)
 
     logging.basicConfig(
@@ -102,6 +105,8 @@ def main(argv: list[str] | None = None) -> None:
         with _turso() as client:
             new = pull(client, config.RAW_DIR)
         logging.info("Instantànies recuperades: %d", len(new))
+    elif args.command == "web":
+        build_site(config.DB_PATH, config.MANUAL_DIR, config.SITE_DIR, args.base)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Viatges dels alts càrrecs{% endblock %}</title>
+  <meta name="description" content="{% block description %}Anàlisi independent dels viatges a l'estranger dels alts càrrecs de la Generalitat de Catalunya, a partir de les dades obertes.{% endblock %}">
+  <link rel="stylesheet" href="{{ base }}estil.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='7' fill='%232a78d6'/></svg>">
+</head>
+<body data-base="{{ base }}">
+  <a class="skip" href="#contingut">Salta al contingut</a>
+  <header class="site-header">
+    <div class="wrap header-row">
+      <a class="brand" href="{{ base }}">Viatges dels alts càrrecs</a>
+      <nav aria-label="Principal">
+        <a href="{{ base }}"{% if page == "inici" %} aria-current="page"{% endif %}>Inici</a>
+        <a href="{{ base }}viatges/"{% if page == "viatges" %} aria-current="page"{% endif %}>Viatges</a>
+        <a href="{{ base }}metodologia/"{% if page == "metodologia" %} aria-current="page"{% endif %}>Metodologia</a>
+      </nav>
+    </div>
+  </header>
+  <main id="contingut" class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p><strong>Aquest no és un web oficial.</strong> Les dades provenen del conjunt
+        <a href="{{ dataset_url }}">Viatges a l'estranger dels alts càrrecs i personal directiu</a>
+        del portal de Dades Obertes de Catalunya i es mostren amb finalitat informativa.
+        Un viatge estadísticament atípic no implica cap irregularitat.</p>
+      <p>Dades actualitzades el {{ updated }} ·
+        <a href="{{ base }}dades/viatges.csv">Descarrega les dades (CSV)</a> ·
+        <a href="{{ base }}metodologia/">Com es fa</a></p>
+    </div>
+  </footer>
+  <div class="tooltip" role="status" hidden></div>
+  <script src="{{ base }}grafics.js" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

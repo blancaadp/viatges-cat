@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Viatges · Viatges dels alts càrrecs{% endblock %}
+{% block content %}
+<h1>Tots els viatges</h1>
+<p class="lead">Cerca per persona, destinació o motiu. Les dades són tal com les publica la Generalitat;
+  els registres amb alguna incidència porten una marca.</p>
+
+<form class="filters" id="filtres" role="search" onsubmit="return false">
+  <label class="field grow">
+    <span>Cerca</span>
+    <input type="search" name="q" placeholder="Nom, destinació o motiu" autocomplete="off">
+  </label>
+  <label class="field">
+    <span>Any</span>
+    <select name="any"><option value="">Tots</option></select>
+  </label>
+  <label class="field">
+    <span>Àmbit</span>
+    <select name="ambit"><option value="">Tots</option></select>
+  </label>
+  <label class="field">
+    <span>País</span>
+    <select name="pais"><option value="">Tots</option></select>
+  </label>
+  <label class="check">
+    <input type="checkbox" name="amaga">
+    <span>Amaga duplicats i exclosos</span>
+  </label>
+</form>
+
+<div class="results-bar">
+  <p id="resum" aria-live="polite">Carregant…</p>
+  <button type="button" class="button secondary" id="csv">Descarrega CSV</button>
+</div>
+
+<div class="table-wrap">
+  <table class="data trips">
+    <thead>
+      <tr>
+        <th scope="col"><button type="button" data-sort="data_inici_iso">Data</button></th>
+        <th scope="col">Persona</th>
+        <th scope="col">Destinació</th>
+        <th scope="col" class="num"><button type="button" data-sort="durada_dies">Dies</button></th>
+        <th scope="col" class="num"><button type="button" data-sort="total_eur">Import</button></th>
+      </tr>
+    </thead>
+    <tbody id="files"></tbody>
+  </table>
+</div>
+<nav class="pager" aria-label="Pàgines">
+  <button type="button" class="button secondary" id="anterior">Anterior</button>
+  <span id="pagina"></span>
+  <button type="button" class="button secondary" id="seguent">Següent</button>
+</nav>
+<noscript><p>L'explorador necessita JavaScript. Pots <a href="{{ base }}dades/viatges.csv">descarregar totes les dades en CSV</a>.</p></noscript>
+{% endblock %}
+{% block scripts %}<script src="{{ base }}explorador.js" defer></script>{% endblock %}

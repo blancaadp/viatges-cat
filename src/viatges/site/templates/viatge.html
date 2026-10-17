@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{{ v.nom }} · {{ v.destinacio }} · Viatges dels alts càrrecs{% endblock %}
+{% block description %}Viatge de {{ v.nom }} ({{ v.carrec }}) a {{ v.destinacio }}, {{ inici }}.{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="{{ base }}viatges/">← Tots els viatges</a></p>
+<h1>{{ v.destinacio }}</h1>
+<p class="lead"><strong>{{ v.nom }}</strong> · {{ v.carrec }}<br>
+  <span class="muted">{{ v.departament }}{% if v.unitat_organica | text and v.unitat_organica != v.departament %} · {{ v.unitat_organica }}{% endif %}</span></p>
+
+{% if marks %}
+<section class="marks" aria-label="Marques del registre">
+  <h2 class="visually-hidden">Marques</h2>
+  <ul>
+    {% for m in marks %}<li>{{ m }}</li>{% endfor %}
+  </ul>
+  {% if duplicat_de %}<p>Registre original: <a href="{{ base }}viatge/{{ duplicat_de }}/">{{ duplicat_de }}</a>.</p>{% endif %}
+</section>
+{% endif %}
+
+<div class="grid-2 detail">
+  <section class="card">
+    <h2>Dates</h2>
+    <dl>
+      <dt>Inici</dt><dd>{{ inici }}</dd>
+      <dt>Fi</dt><dd>{{ fi }}</dd>
+      <dt>Durada</dt><dd>{{ v.durada_dies | enter if v.durada_dies == v.durada_dies else "—" }} dies</dd>
+      {% if paisos %}<dt>País</dt><dd>{{ paisos | join(", ") }}</dd>{% endif %}
+      {% if delay is not none %}<dt>Publicat</dt><dd>{{ delay }} dies després de tornar</dd>{% endif %}
+    </dl>
+  </section>
+  <section class="card">
+    <h2>Despeses</h2>
+    <table class="data compact">
+      <tbody>
+        {% for name, value in partides %}<tr><th scope="row">{{ name }}</th><td class="num">{{ value }}</td></tr>{% endfor %}
+      </tbody>
+      <tfoot><tr><th scope="row">Total publicat</th><td class="num">{{ total }}</td></tr></tfoot>
+    </table>
+    {% if v.altres_despeses_detall | text %}<p class="muted small">Altres despeses: {{ v.altres_despeses_detall }}</p>{% endif %}
+  </section>
+</div>
+
+<section class="card prose">
+  <h2>Motiu</h2>
+  <p>{{ v.motiu }}</p>
+  {% if v.agenda | text %}<h2>Agenda</h2><p class="pre">{{ v.agenda | enllacos }}</p>{% endif %}
+  {% if v.comitiva | text %}<h2>Comitiva</h2><p class="pre">{{ v.comitiva }}</p>{% endif %}
+  {% if v.observacions | text %}<h2>Observacions</h2><p class="pre">{{ v.observacions | enllacos }}</p>{% endif %}
+</section>
+
+{% if notes %}
+<section class="card">
+  <h2>Revisió manual</h2>
+  <p class="sub">Notes de la revisió. No modifiquen les dades publicades: les xifres d'aquest web fan servir sempre el valor original.</p>
+  <ul class="notes">
+    {% for n in notes %}
+    <li><strong>{{ n.camp }}: {{ n.valor }}</strong>. {{ n.motiu }} <span class="muted">Font: {{ n.font }}.</span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<p class="muted small">Identificador del registre al portal: <code>{{ v.id }}</code> ·
+  <a href="{{ dataset_url }}">Conjunt de dades original</a></p>
+{% endblock %}

@@ -16,6 +16,7 @@ PROCESSED_DIR = DATA_DIR / "processed"
 MANUAL_DIR = DATA_DIR / "manual"
 DB_PATH = DATA_DIR / "viatges.sqlite"
 REPORTS_DIR = ROOT / "reports"
+SITE_DIR = ROOT / "site"
 
 
 def app_token() -> str | None:

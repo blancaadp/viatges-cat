@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="intro">
+  <h1>Què costen els viatges a l'estranger dels alts càrrecs?</h1>
+  <p class="lead">Tots els viatges oficials a l'estranger que la Generalitat de Catalunya ha publicat
+    des del {{ first_year }}, amb les dades tal com les publica el portal de transparència.</p>
+</section>
+
+<section class="kpis" aria-label="Xifres clau">
+  {% for label, value in kpis %}
+  <div class="kpi">
+    <div class="kpi-label">{{ label }}</div>
+    <div class="kpi-value">{{ value }}</div>
+  </div>
+  {% endfor %}
+</section>
+<p class="note">Les xifres no inclouen {{ n_duplicats }} registres duplicats ni {{ n_exclosos }} viatges
+  amb una durada anòmala. <a href="{{ base }}metodologia/">Per què?</a></p>
+
+<section class="card">
+  <h2>Despesa per any</h2>
+  <p class="sub">Segons l'any d'inici del viatge. {{ current_year }}* és l'any en curs i les dades es
+    publiquen amb retard.</p>
+  {{ year_chart | safe }}
+  <details>
+    <summary>Mostra les dades en una taula</summary>
+    <table class="data">
+      <thead><tr><th scope="col">Any</th><th scope="col" class="num">Despesa</th><th scope="col" class="num">Viatges</th></tr></thead>
+      <tbody>
+        {% for year, total, n in year_table %}
+        <tr><td>{{ year }}</td><td class="num">{{ total }}</td><td class="num">{{ n }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </details>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>Àmbits amb més despesa</h2>
+    <p class="sub">Els departaments canvien de nom a cada legislatura; l'àmbit els agrupa.</p>
+    <ul class="bars">
+      {% for r in ambit_rows %}
+      <li tabindex="0" data-tip="{{ r.tip }}">
+        <span class="bar-label">{{ r.label }}</span>
+        <span class="bar-track"><span class="bar-fill" style="--p: {{ '%.1f' % r.pct }}"></span><span class="bar-value">{{ r.display }}</span></span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  <section class="card">
+    <h2>Països més visitats</h2>
+    <p class="sub">Nombre de viatges amb almenys una destinació al país.</p>
+    <ul class="bars">
+      {% for r in country_rows %}
+      <li tabindex="0" data-tip="{{ r.tip }}">
+        <a class="bar-label" href="{{ r.href }}">{{ r.label }}</a>
+        <span class="bar-track"><span class="bar-fill" style="--p: {{ '%.1f' % r.pct }}"></span><span class="bar-value">{{ r.display }}</span></span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+
+<section class="cta">
+  <a class="button" href="{{ base }}viatges/">Explora tots els viatges</a>
+</section>
+{% endblock %}
