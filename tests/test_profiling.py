@@ -18,7 +18,7 @@ def test_parse_amount():
     assert failed.tolist() == [False, False, False, False, False, True]
 
 
-def test_parse_date_acepta_iso_y_dmy():
+def test_parse_date_accepta_iso_i_dmy():
     out, failed = parse_date(pd.Series(["22/09/2020", "2023-03-01T00:00:00.000", "32/13/2020"]))
     assert out[0] == pd.Timestamp("2020-09-22")
     assert out[1] == pd.Timestamp("2023-03-01")
@@ -39,7 +39,7 @@ def test_split_destinations():
     assert out["pais"].tolist() == ["Japó", "Japó", "Bèlgica"]
 
 
-def test_inventario_detecta_problemas(snapshot_dir):
+def test_inventari_detecta_problemes(snapshot_dir):
     df, info = load_snapshot(snapshot_dir)
     assert info["missing_columns"] == []
     inv = build_inventory(df)
@@ -56,6 +56,6 @@ def test_inventario_detecta_problemas(snapshot_dir):
     assert "# Fase 0" in report
 
 
-def test_run_profile_escribe_informe(snapshot_dir, tmp_path):
+def test_run_profile_escriu_informe(snapshot_dir, tmp_path):
     out = run_profile(snapshot_dir, tmp_path / "reports")
     assert out.exists()

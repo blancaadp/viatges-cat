@@ -1,10 +1,10 @@
-"""Fase 1: limpieza y normalización.
+"""Fase 1: neteja i normalització.
 
-Implementa las reglas de `docs/decisions/0002-reglas-de-limpieza.md`. Resumen:
+Implementa les regles de `docs/decisions/0002-regles-de-neteja.md`. Resum:
 
-- Las columnas originales se conservan; lo limpio va en columnas nuevas (`*_clean`, `ambit`…).
-- Nada se borra: los problemas se señalan con columnas `flag_*`.
-- Las reglas generales están aquí; las excepciones caso a caso, en `data/manual/`.
+- Les columnes originals es conserven; el que és net va en columnes noves (`*_clean`, `ambit`…).
+- No s'esborra res: els problemes s'assenyalen amb columnes `flag_*`.
+- Les regles generals són aquí; les excepcions cas per cas, a `data/manual/`.
 """
 
 from __future__ import annotations
@@ -29,17 +29,17 @@ from viatges.schema import AMOUNT_COLUMNS, COST_COLUMNS
 
 log = logging.getLogger(__name__)
 
-ROUNDING_TOLERANCE = 5.0  # € de diferencia entre suma de partidas y total que aceptamos
+ROUNDING_TOLERANCE = 5.0  # € de diferència acceptada entre la suma de partides i el total
 MAX_PLAUSIBLE_DAYS = 21
 TEXT_COLUMNS = ["observacions", "comitiva", "altres_despeses_detall", "agenda"]
 HOME_COUNTRY = "ES"
 
-# Campos de revisión manual: no existen en el dataset, los crea `correcciones.csv`
+# Camps de revisió manual: no existeixen al dataset, els crea `correccions.csv`
 REVIEW_FIELDS = ["revisio_duplicat_de", "revisio_desdoblament"]
 SPLIT_DECISIONS = {"complementari", "independent", "pendent"}
 
 # ---------------------------------------------------------------------------
-# Diccionarios manuales
+# Diccionaris manuals
 # ---------------------------------------------------------------------------
 
 
@@ -48,7 +48,7 @@ class Manual:
     paisos: pd.DataFrame  # variant, pais, iso2
     ciutats: pd.DataFrame  # variant, ciutat, iso2
     departaments: pd.DataFrame  # departament, departament_clean, ambit
-    correcciones: pd.DataFrame  # id, campo, valor_nuevo, motivo, fuente
+    correccions: pd.DataFrame  # id, camp, valor_nou, motiu, font
 
 
 def load_manual(manual_dir: Path) -> Manual:
@@ -59,22 +59,22 @@ def load_manual(manual_dir: Path) -> Manual:
         paisos=read("paisos.csv"),
         ciutats=read("ciutats.csv"),
         departaments=read("departaments.csv"),
-        correcciones=read("correcciones.csv"),
+        correccions=read("correccions.csv"),
     )
 
 
 def lookup_key(text: str) -> str:
-    """Clave para buscar en los diccionarios: sin acentos, mayúsculas ni puntuación."""
+    """Clau per buscar als diccionaris: sense accents, majúscules ni puntuació."""
     return re.sub(r"[^a-z0-9?]", "", strip_accents(text))
 
 
 # ---------------------------------------------------------------------------
-# Correcciones caso a caso
+# Correccions cas per cas
 # ---------------------------------------------------------------------------
 
 
 def apply_corrections(df: pd.DataFrame, corrections: pd.DataFrame) -> pd.DataFrame:
-    """Sustituye valores puntuales y deja constancia en la columna `correccions`."""
+    """Substitueix valors puntuals i en deixa constància a la columna `correccions`."""
     out = df.copy()
     out["correccions"] = ""
     for field in REVIEW_FIELDS:
@@ -82,21 +82,21 @@ def apply_corrections(df: pd.DataFrame, corrections: pd.DataFrame) -> pd.DataFra
     for row in corrections.itertuples(index=False):
         mask = out["id"] == row.id
         if not mask.any():
-            log.warning("Corrección para un id que no existe: %s", row.id)
+            log.warning("Correcció per a un id que no existeix: %s", row.id)
             continue
-        if row.campo not in out.columns:
-            raise ValueError(f"Corrección sobre una columna desconocida: {row.campo}")
-        out.loc[mask, row.campo] = row.valor_nuevo
-        out.loc[mask, "correccions"] += f"{row.campo};"
+        if row.camp not in out.columns:
+            raise ValueError(f"Correcció sobre una columna desconeguda: {row.camp}")
+        out.loc[mask, row.camp] = row.valor_nou
+        out.loc[mask, "correccions"] += f"{row.camp};"
     out["correccions"] = out["correccions"].str.rstrip(";").replace("", pd.NA)
     return out
 
 
 # ---------------------------------------------------------------------------
-# Importes
+# Imports
 # ---------------------------------------------------------------------------
 
-# Orden importante: la primera categoría que encaja gana
+# L'ordre importa: guanya la primera categoria que encaixa
 _ZERO_REASONS = [
     ("pendent", r"en curs|s.estan gestionant|pendent|en tr[àa]mit"),
     ("imputat_a_altre", r"imput|inclo[sue]|inclòs|desglossar|registre del viatge"),
@@ -123,18 +123,18 @@ def clean_amounts(df: pd.DataFrame) -> pd.DataFrame:
     all_parts = parts.notna().all(axis=1)
     parts_sum = parts.sum(axis=1)
 
-    # Total vacío pero partidas completas -> la suma
+    # Total buit però partides completes -> la suma
     fill = out["total_clean"].isna() & all_parts
     out.loc[fill, "total_clean"] = parts_sum[fill]
     out["flag_total_calculat"] = fill.fillna(False).astype(bool)
 
-    # Suma de partidas ≠ total: redondeo tolerable o inconsistencia
+    # Suma de partides ≠ total: arrodoniment tolerable o inconsistència
     diff = (out["total_clean"] - parts_sum).abs().where(all_parts)
     in_range = diff.between(0.01, ROUNDING_TOLERANCE, inclusive="right")
     out["flag_redondeig"] = in_range.fillna(False).astype(bool)
     out["flag_import_inconsistent"] = (diff > ROUNDING_TOLERANCE).fillna(False).astype(bool)
 
-    # Total = 0: por qué
+    # Total = 0: per què
     zero = (out["total_clean"] == 0).fillna(False).astype(bool)
     out["motiu_import_zero"] = classify_zero_total(out["observacions"]).where(zero)
     pending = (out["motiu_import_zero"] == "pendent").fillna(False).astype(bool)
@@ -145,7 +145,7 @@ def clean_amounts(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Fechas
+# Dates
 # ---------------------------------------------------------------------------
 
 
@@ -162,28 +162,28 @@ def clean_dates(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Duplicados
+# Duplicats
 # ---------------------------------------------------------------------------
 
 
 def _id_priority(ids: pd.Series) -> pd.DataFrame:
-    """racc* antes que CMH/ACC (destino mejor informado); después, el número más bajo."""
+    """racc* abans que CMH/ACC (destinació més ben informada); després, el número més baix."""
     prefix = ids.str.extract(r"^([A-Za-z]+)")[0]
     number = pd.to_numeric(ids.str.extract(r"(\d+)")[0], errors="coerce")
     return pd.DataFrame({"rank": (~prefix.str.startswith("racc")).astype(int), "num": number})
 
 
 def mark_duplicates(df: pd.DataFrame) -> pd.DataFrame:
-    """Misma persona y fecha de inicio: mismo total -> duplicado; distinto -> desdoblamiento.
+    """Mateixa persona i data d'inici: mateix total -> duplicat; diferent -> desdoblament.
 
-    Las decisiones revisadas a mano (`revisio_*`, desde `correcciones.csv`) mandan sobre la
-    detección automática:
+    Les decisions revisades a mà (`revisio_*`, des de `correccions.csv`) passen per davant
+    de la detecció automàtica:
 
-    - `revisio_duplicat_de = <id>`: el registro es un duplicado de `<id>`.
-    - `revisio_desdoblament = complementari`: mismo viaje con los costes repartidos; se suman
-      y se cuenta una vez.
-    - `revisio_desdoblament = independent`: viajes distintos; cada uno es su propio grupo.
-    - `revisio_desdoblament = pendent`: revisado pero sin resolver; sigue marcado.
+    - `revisio_duplicat_de = <id>`: el registre és un duplicat de `<id>`.
+    - `revisio_desdoblament = complementari`: mateix viatge amb els costos repartits; se
+      sumen i es compta una vegada.
+    - `revisio_desdoblament = independent`: viatges diferents; cadascun és el seu grup.
+    - `revisio_desdoblament = pendent`: revisat però sense resoldre; continua marcat.
     """
     out = df.copy()
     for field in REVIEW_FIELDS:
@@ -191,13 +191,13 @@ def mark_duplicates(df: pd.DataFrame) -> pd.DataFrame:
             out[field] = pd.Series(pd.NA, index=out.index, dtype="string")
     unknown = set(out["revisio_desdoblament"].dropna()) - SPLIT_DECISIONS
     if unknown:
-        raise ValueError(f"Decisión de desdoblamiento desconocida: {sorted(unknown)}")
+        raise ValueError(f"Decisió de desdoblament desconeguda: {sorted(unknown)}")
 
     out["nom_clau"] = out["nom"].map(lambda s: " ".join(str(s).split()).casefold())
     order = pd.concat([out, _id_priority(out["id"])], axis=1).sort_values(
         ["nom_clau", "data_inici_clean", "rank", "num"]
     )
-    # Un viaje independiente forma su propio grupo
+    # Un viatge independent forma el seu propi grup
     independent = (order["revisio_desdoblament"] == "independent").fillna(False)
     order["clau_grup"] = order["data_inici_clean"].astype(str)
     order.loc[independent, "clau_grup"] = order["clau_grup"] + "|" + order["id"]
@@ -226,7 +226,7 @@ def mark_duplicates(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Destinos
+# Destinacions
 # ---------------------------------------------------------------------------
 
 _SEPARATORS = "/;\n"
@@ -236,11 +236,11 @@ _TRAM_RE = re.compile(r"^(?P<ciutat>[^()]*?)\s*(?:\((?P<pais>[^()]*)\))?\.?$")
 
 
 def split_trams(destinacio: str) -> list[str]:
-    """Separa un campo de destino en tramos.
+    """Separa un camp de destinació en trams.
 
-    Corta por `/`, `;` o salto de línea fuera de paréntesis, y también justo después de
-    un paréntesis de país si detrás viene otro destino ("Tànger (Marroc) i Rabat (Marroc)").
-    Las comas sueltas no cortan, para no romper "Washington, D.C.".
+    Talla per `/`, `;` o salt de línia fora de parèntesis, i també just després d'un
+    parèntesi de país si darrere ve una altra destinació ("Tànger (Marroc) i Rabat (Marroc)").
+    Les comes soles no tallen, per no trencar "Washington, D.C.".
     """
     trams, buf, depth = [], "", 0
     for ch in destinacio:
@@ -262,7 +262,7 @@ def split_trams(destinacio: str) -> list[str]:
 
 
 def normalize_place(text: str | None) -> str | None:
-    """Arreglos mecánicos de grafía: Unicode, espacios, mayúsculas, `l.l` -> `l·l`."""
+    """Arranjaments mecànics de grafia: Unicode, espais, majúscules, `l.l` -> `l·l`."""
     if text is None or pd.isna(text):
         return None
     t = " ".join(unicodedata.normalize("NFC", text).split()).strip(" .\"'")
@@ -273,11 +273,11 @@ def normalize_place(text: str | None) -> str | None:
 
 
 def build_trams(df: pd.DataFrame, manual: Manual) -> pd.DataFrame:
-    """Una fila por tramo con ciudad y país normalizados (ISO 3166-1 alfa-2)."""
+    """Una fila per tram amb ciutat i país normalitzats (ISO 3166-1 alfa-2)."""
     paisos = {lookup_key(r.variant): (r.pais, r.iso2) for r in manual.paisos.itertuples()}
     iso_name = {iso: name for name, iso in paisos.values()}
     ciutats = {lookup_key(r.variant): (r.ciutat, r.iso2) for r in manual.ciutats.itertuples()}
-    for name, iso in set(ciutats.values()):  # la forma canónica también se reconoce
+    for name, iso in set(ciutats.values()):  # la forma canònica també es reconeix
         ciutats.setdefault(lookup_key(name), (name, iso))
 
     rows = []
@@ -296,7 +296,7 @@ def build_trams(df: pd.DataFrame, manual: Manual) -> pd.DataFrame:
                     ciutat, city_iso = ciutats[key]
                     ciutat_mapejada = True
                     iso = iso or city_iso
-                elif pais_raw is None and key in paisos:  # el tramo es un país: "Japó"
+                elif pais_raw is None and key in paisos:  # el tram és un país: "Japó"
                     iso, ciutat = paisos[key][1], None
                     pais_mapejat = True
             rows.append(
@@ -317,7 +317,7 @@ def build_trams(df: pd.DataFrame, manual: Manual) -> pd.DataFrame:
 
 
 def summarize_trams(df: pd.DataFrame, trams: pd.DataFrame) -> pd.DataFrame:
-    """Añade a cada viaje sus países y si es realmente un viaje al extranjero."""
+    """Afegeix a cada viatge els seus països i si és realment un viatge a l'estranger."""
     per_trip = trams.groupby("id").agg(
         n_trams=("ordre", "size"),
         paisos_iso2=("iso2", lambda s: ";".join(dict.fromkeys(s.dropna()))),
@@ -332,7 +332,7 @@ def summarize_trams(df: pd.DataFrame, trams: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Departamentos y textos
+# Departaments i textos
 # ---------------------------------------------------------------------------
 
 
@@ -356,13 +356,13 @@ def clean_texts(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Orquestación
+# Orquestració
 # ---------------------------------------------------------------------------
 
 
 def clean(df: pd.DataFrame, manual: Manual) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Devuelve (viajes, tramos) limpios."""
-    viatges = apply_corrections(df, manual.correcciones)
+    """Retorna (viatges, trams) nets."""
+    viatges = apply_corrections(df, manual.correccions)
     viatges = clean_amounts(viatges)
     viatges = clean_dates(viatges)
     viatges = mark_duplicates(viatges)
@@ -373,7 +373,7 @@ def clean(df: pd.DataFrame, manual: Manual) -> tuple[pd.DataFrame, pd.DataFrame]
     return viatges, trams
 
 
-def _table(obj: pd.DataFrame | pd.Series, empty: str = "_Ninguno._") -> str:
+def _table(obj: pd.DataFrame | pd.Series, empty: str = "_Cap._") -> str:
     return obj.to_markdown() if len(obj) else empty
 
 
@@ -388,49 +388,49 @@ def render_report(viatges: pd.DataFrame, trams: pd.DataFrame, info: dict) -> str
         ["grup_viatge", "id", "nom", "data_inici_clean", "total_clean"],
     ].sort_values(["grup_viatge", "id"])
     lines = [
-        "# Fase 1 · Resultado de la limpieza",
+        "# Fase 1 · Resultat de la neteja",
         "",
-        f"_Instantánea descargada el {info.get('downloaded_at', '?')}. "
-        "Reglas: [ADR 0002](../docs/decisions/0002-reglas-de-limpieza.md)._",
+        f"_Instantània descarregada el {info.get('downloaded_at', '?')}. "
+        "Regles: [ADR 0002](../docs/decisions/0002-regles-de-neteja.md)._",
         "",
-        f"- Viajes: **{len(viatges)}** · tramos de destino: **{len(trams)}**",
-        f"- Correcciones manuales aplicadas: {int(viatges['correccions'].notna().sum())}",
-        f"- Ciudades distintas tras normalizar: {trams['ciutat'].nunique()} "
-        f"(antes {trams['ciutat_raw'].nunique()})",
-        f"- Países distintos: {trams['iso2'].nunique()}",
-        f"- Departamentos sin ámbito asignado: {int(viatges['ambit'].isna().sum())}",
+        f"- Viatges: **{len(viatges)}** · trams de destinació: **{len(trams)}**",
+        f"- Correccions manuals aplicades: {int(viatges['correccions'].notna().sum())}",
+        f"- Ciutats diferents després de normalitzar: {trams['ciutat'].nunique()} "
+        f"(abans {trams['ciutat_raw'].nunique()})",
+        f"- Països diferents: {trams['iso2'].nunique()}",
+        f"- Departaments sense àmbit assignat: {int(viatges['ambit'].isna().sum())}",
         "",
-        "## Señales (`flag_*`)",
+        "## Senyals (`flag_*`)",
         "",
-        _table(flags.rename("registros")),
+        _table(flags.rename("registres")),
         "",
-        "## Motivo de los importes a cero",
+        "## Motiu dels imports a zero",
         "",
         _table(viatges["motiu_import_zero"].value_counts()),
         "",
-        "## Duplicados descartados",
+        "## Duplicats descartats",
         "",
         _table(dups.set_index("id")),
         "",
-        "## Posibles desdoblamientos (revisar)",
+        "## Possibles desdoblaments (revisar)",
         "",
         _table(splits.set_index("grup_viatge")),
         "",
-        "## Pendiente de completar en `data/manual/`",
+        "## Pendent de completar a `data/manual/`",
         "",
-        "### Países sin mapear (`paisos.csv`)",
+        "### Països sense mapejar (`paisos.csv`)",
         "",
         _table(unmapped_countries.value_counts()),
         "",
-        "### Tramos sin país",
+        "### Trams sense país",
         "",
         _table(no_country.value_counts()),
         "",
-        "### Ciudades que aún parecen variantes (`ciutats.csv`, heurística)",
+        "### Ciutats que encara semblen variants (`ciutats.csv`, heurística)",
         "",
         _table(remaining_variants),
         "",
-        "### Departamentos sin ámbito (`departaments.csv`)",
+        "### Departaments sense àmbit (`departaments.csv`)",
         "",
         _table(viatges.loc[viatges["ambit"].isna(), "departament"].value_counts()),
         "",

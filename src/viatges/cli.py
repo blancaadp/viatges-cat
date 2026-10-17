@@ -1,4 +1,4 @@
-"""Punto de entrada: `uv run viatges <comando>`."""
+"""Punt d'entrada: `uv run viatges <ordre>`."""
 
 from __future__ import annotations
 
@@ -15,14 +15,14 @@ from viatges.profiling import run_profile
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="viatges", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("ingest", help="Descarga el dataset completo como instantánea cruda")
-    profile = sub.add_parser("profile", help="Genera el inventario de calidad (Fase 0)")
+    sub.add_parser("ingest", help="Descarrega el dataset complet com a instantània en cru")
+    profile = sub.add_parser("profile", help="Genera l'inventari de qualitat (Fase 0)")
     profile.add_argument(
-        "--snapshot", type=Path, help="Carpeta de instantánea (por defecto, la última)"
+        "--snapshot", type=Path, help="Carpeta de la instantània (per defecte, la darrera)"
     )
-    clean = sub.add_parser("clean", help="Limpia y normaliza una instantánea (Fase 1)")
+    clean = sub.add_parser("clean", help="Neteja i normalitza una instantània (Fase 1)")
     clean.add_argument(
-        "--snapshot", type=Path, help="Carpeta de instantánea (por defecto, la última)"
+        "--snapshot", type=Path, help="Carpeta de la instantània (per defecte, la darrera)"
     )
     args = parser.parse_args(argv)
 
@@ -35,11 +35,11 @@ def main(argv: list[str] | None = None) -> None:
     elif args.command == "profile":
         snapshot = args.snapshot or latest_snapshot()
         out = run_profile(snapshot, config.REPORTS_DIR)
-        logging.info("Informe escrito en %s", out)
+        logging.info("Informe escrit a %s", out)
     elif args.command == "clean":
         snapshot = args.snapshot or latest_snapshot()
         out = run_clean(snapshot, config.MANUAL_DIR, config.PROCESSED_DIR, config.REPORTS_DIR)
-        logging.info("Datos limpios en %s", out)
+        logging.info("Dades netes a %s", out)
 
 
 if __name__ == "__main__":

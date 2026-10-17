@@ -1,9 +1,9 @@
-"""Descarga el dataset completo y lo guarda como instantánea cruda e inmutable.
+"""Descarrega el dataset complet i el desa com a instantània en cru i immutable.
 
-Cada ejecución crea data/raw/<timestamp UTC>/ con:
-  - rows.json      filas tal como las devuelve la API (sin tocar)
-  - metadata.json  metadatos del dataset (esquema, fechas de actualización)
-  - manifest.json  resumen de la descarga (cuándo, cuántas filas, hash)
+Cada execució crea data/raw/<timestamp UTC>/ amb:
+  - rows.json      files tal com les retorna l'API (sense tocar)
+  - metadata.json  metadades del dataset (esquema, dates d'actualització)
+  - manifest.json  resum de la descàrrega (quan, quantes files, hash)
 """
 
 from __future__ import annotations
@@ -55,12 +55,12 @@ def run_ingest(client: SodaClient | None = None, raw_dir: Path = config.RAW_DIR)
         "sha256_rows": hashlib.sha256(raw_bytes).hexdigest(),
     }
     _write_json(snapshot_dir / "manifest.json", manifest)
-    log.info("Instantánea guardada en %s (%d filas)", snapshot_dir, len(rows))
+    log.info("Instantània desada a %s (%d files)", snapshot_dir, len(rows))
     return snapshot_dir
 
 
 def latest_snapshot(raw_dir: Path = config.RAW_DIR) -> Path:
     snapshots = sorted(p for p in raw_dir.glob("*") if (p / "manifest.json").exists())
     if not snapshots:
-        raise FileNotFoundError(f"No hay instantáneas en {raw_dir}. Ejecuta `viatges ingest`.")
+        raise FileNotFoundError(f"No hi ha instantànies a {raw_dir}. Executa `viatges ingest`.")
     return snapshots[-1]

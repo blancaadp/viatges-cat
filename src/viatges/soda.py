@@ -1,4 +1,4 @@
-"""Cliente mínimo para la API SODA de Socrata, con paginación y reintentos."""
+"""Client mínim per a l'API SODA de Socrata, amb paginació i reintents."""
 
 from __future__ import annotations
 
@@ -28,10 +28,10 @@ class SodaClient:
         headers = {"Accept": "application/json"}
         auth: tuple[str, str] | None = None
         if app_token and app_secret:
-            # Clau API nueva (ID + Secreto): requiere autenticación Basic.
+            # Clau API nova (ID + secret): requereix autenticació Basic.
             auth = (app_token, app_secret)
         elif app_token:
-            # Token antiguo de un solo valor.
+            # Token antic d'un sol valor.
             headers["X-App-Token"] = app_token
         self._client = httpx.Client(
             base_url=f"https://{domain}",
@@ -62,16 +62,16 @@ class SodaClient:
                 if not retryable or attempt == self.max_retries:
                     raise
                 wait = self.backoff_base**attempt
-                log.warning("Fallo en %s (%s). Reintento %d en %.0fs", path, exc, attempt, wait)
+                log.warning("Error a %s (%s). Reintent %d d'aquí a %.0fs", path, exc, attempt, wait)
                 time.sleep(wait)
-        raise RuntimeError("inalcanzable")  # pragma: no cover
+        raise RuntimeError("inabastable")  # pragma: no cover
 
     def metadata(self, dataset_id: str) -> dict[str, Any]:
-        """Metadatos del dataset: columnas, tipos, fecha de última actualización..."""
+        """Metadades del dataset: columnes, tipus, data de darrera actualització..."""
         return self._get(f"/api/views/{dataset_id}.json")
 
     def fetch_all(self, dataset_id: str, page_size: int = 1000) -> list[dict[str, Any]]:
-        """Descarga todas las filas paginando. Ordena por :id para que la paginación sea estable."""
+        """Descarrega totes les files paginant. Ordena per :id perquè la paginació sigui estable."""
         rows: list[dict[str, Any]] = []
         offset = 0
         while True:
@@ -80,7 +80,7 @@ class SodaClient:
                 params={"$limit": page_size, "$offset": offset, "$order": ":id"},
             )
             rows.extend(page)
-            log.info("Página con offset %d: %d filas (total %d)", offset, len(page), len(rows))
+            log.info("Pàgina amb offset %d: %d files (total %d)", offset, len(page), len(rows))
             if len(page) < page_size:
                 return rows
             offset += page_size

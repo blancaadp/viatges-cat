@@ -4,7 +4,7 @@ import pytest
 from viatges.soda import SodaClient
 
 
-def test_fetch_all_pagina_hasta_pagina_incompleta():
+def test_fetch_all_pagina_fins_a_pagina_incompleta():
     calls = []
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -20,7 +20,7 @@ def test_fetch_all_pagina_hasta_pagina_incompleta():
     assert calls == [0, 2, 4]
 
 
-def test_reintenta_errores_temporales():
+def test_reintenta_errors_temporals():
     attempts = {"n": 0}
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -35,7 +35,7 @@ def test_reintenta_errores_temporales():
     assert attempts["n"] == 3
 
 
-def test_no_reintenta_errores_del_cliente():
+def test_no_reintenta_errors_del_client():
     transport = httpx.MockTransport(lambda r: httpx.Response(404))
     with (
         SodaClient("example.org", transport=transport, backoff_base=0) as client,
@@ -51,6 +51,6 @@ def test_envia_app_token():
         seen["token"] = request.headers.get("X-App-Token")
         return httpx.Response(200, json={})
 
-    with SodaClient("example.org", "secreto", transport=httpx.MockTransport(handler)) as c:
+    with SodaClient("example.org", "secret", transport=httpx.MockTransport(handler)) as c:
         c.metadata("abcd-1234")
-    assert seen["token"] == "secreto"
+    assert seen["token"] == "secret"

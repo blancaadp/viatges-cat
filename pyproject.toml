@@ -1,7 +1,7 @@
 [project]
 name = "viatges-cat"
 version = "0.1.0"
-description = "Análisis independiente de los viajes al extranjero de los altos cargos de la Generalitat de Catalunya"
+description = "Anàlisi independent dels viatges a l'estranger dels alts càrrecs de la Generalitat de Catalunya"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

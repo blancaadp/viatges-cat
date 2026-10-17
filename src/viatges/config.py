@@ -1,4 +1,4 @@
-"""Configuración central del proyecto."""
+"""Configuració central del projecte."""
 
 import os
 from pathlib import Path
@@ -18,12 +18,12 @@ REPORTS_DIR = ROOT / "reports"
 
 
 def app_token() -> str | None:
-    """ID de la clau API de Socrata desde .env o variables de entorno (None si no hay)."""
+    """ID de la clau API de Socrata des de .env o variables d'entorn (None si no n'hi ha)."""
     load_dotenv(ROOT / ".env")
     return os.getenv("SODA_APP_TOKEN") or None
 
 
 def app_secret() -> str | None:
-    """Clau secreta de Socrata desde .env o variables de entorno (None si no hay)."""
+    """Clau secreta de Socrata des de .env o variables d'entorn (None si no n'hi ha)."""
     load_dotenv(ROOT / ".env")
     return os.getenv("SODA_APP_SECRET") or None

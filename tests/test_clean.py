@@ -51,14 +51,14 @@ def manual() -> Manual:
                 {"departament": "Cultura", "departament_clean": "Cultura", "ambit": "Cultura"},
             ]
         ),
-        correcciones=frame(
+        correccions=frame(
             [
                 {
                     "id": "racc-X",
-                    "campo": "destinacio",
-                    "valor_nuevo": "Brussels (Bèlgica)",
-                    "motivo": "test",
-                    "fuente": "test",
+                    "camp": "destinacio",
+                    "valor_nou": "Brussels (Bèlgica)",
+                    "motiu": "test",
+                    "font": "test",
                 }
             ]
         ),
@@ -125,11 +125,11 @@ def amounts(**overrides) -> dict:
 def test_clean_amounts():
     df = frame(
         [
-            amounts(),  # cuadra
-            amounts(total=""),  # total calculado
-            amounts(total="62"),  # redondeo tolerable
-            amounts(total="100"),  # inconsistente
-            amounts(altres_despeses="", total=""),  # incompleto: no se inventa
+            amounts(),  # quadra
+            amounts(total=""),  # total calculat
+            amounts(total="62"),  # arrodoniment tolerable
+            amounts(total="100"),  # inconsistent
+            amounts(altres_despeses="", total=""),  # incomplet: no s'inventa
             amounts(
                 dietes="0",
                 allotjament="0",
@@ -149,7 +149,7 @@ def test_clean_amounts():
     assert pd.isna(out["total_clean"].iloc[5])
 
 
-def test_clean_dates_marca_viajes_largos():
+def test_clean_dates_marca_viatges_llargs():
     df = frame(
         [
             {"data_inici": "22/09/2020", "data_fi": "23/09/2020"},
@@ -171,11 +171,11 @@ def test_mark_duplicates():
         }
     )
     out = mark_duplicates(df).set_index("id")
-    # el registro racc tiene prioridad sobre el CMH
+    # el registre racc té prioritat sobre el CMH
     assert out.loc["CMH020", "flag_duplicat"]
     assert out.loc["CMH020", "duplicat_de"] == "racc-31"
     assert not out.loc["racc-31", "flag_duplicat"]
-    # mismo viaje con importes distintos: se agrupa pero no se descarta
+    # mateix viatge amb imports diferents: s'agrupa però no es descarta
     assert out.loc[["racc-1036", "racc-1053"], "flag_possible_desdoblament"].all()
     assert set(out.loc[["racc-1036", "racc-1053"], "grup_viatge"]) == {"racc-1036"}
     assert not out.loc["racc-1", "flag_possible_desdoblament"]
@@ -200,7 +200,7 @@ def test_build_trams(manual):
     assert trams["pais"].tolist()[-1] == "França"
 
 
-def test_build_trams_no_fuerza_una_ciudad_de_otro_pais(manual):
+def test_build_trams_no_forca_una_ciutat_d_un_altre_pais(manual):
     trams = build_trams(pd.DataFrame({"id": ["a"], "destinacio": ["Tokyo (França)"]}), manual)
     assert trams["ciutat"].tolist() == ["Tokyo"]
     assert not trams["ciutat_mapejada"].iloc[0]
@@ -208,14 +208,14 @@ def test_build_trams_no_fuerza_una_ciudad_de_otro_pais(manual):
 
 
 def test_apply_corrections(manual):
-    df = pd.DataFrame({"id": ["racc-X", "otro"], "destinacio": ["Brussel·les", "Roma"]})
-    out = apply_corrections(df, manual.correcciones)
+    df = pd.DataFrame({"id": ["racc-X", "altre"], "destinacio": ["Brussel·les", "Roma"]})
+    out = apply_corrections(df, manual.correccions)
     assert out["destinacio"].tolist() == ["Brussels (Bèlgica)", "Roma"]
     assert out["correccions"].tolist()[0] == "destinacio"
     assert pd.isna(out["correccions"].iloc[1])
 
 
-def test_clean_sobre_fixture(snapshot_dir, manual):
+def test_clean_sobre_la_fixture(snapshot_dir, manual):
     df, _ = load_snapshot(snapshot_dir)
     viatges, trams = clean(df, manual)
     v = viatges.set_index("id")
@@ -223,12 +223,12 @@ def test_clean_sobre_fixture(snapshot_dir, manual):
     assert v.loc["ACC003", "total_clean"] == pytest.approx(4002.80)
     assert v.loc["racc-834", "n_trams"] == 2
     assert v.loc["racc-1050", "paisos_iso2"] == "PL;BE"
-    assert pd.isna(v.loc["racc-834", "comitiva_clean"])  # "*" es relleno
+    assert pd.isna(v.loc["racc-834", "comitiva_clean"])  # "*" és farciment
     assert v.loc["racc-833", "comitiva_clean"] == "Cap de Gabinet"
     assert v.loc["racc-833", "ambit"] == "Empresa"
 
 
-def test_run_clean_escribe_salidas(snapshot_dir, manual, tmp_path, monkeypatch):
+def test_run_clean_escriu_les_sortides(snapshot_dir, manual, tmp_path, monkeypatch):
     monkeypatch.setattr("viatges.clean.load_manual", lambda _: manual)
     out = run_clean(snapshot_dir, tmp_path, tmp_path / "processed", tmp_path / "reports")
     assert (out / "viatges.csv").exists()
@@ -236,7 +236,7 @@ def test_run_clean_escribe_salidas(snapshot_dir, manual, tmp_path, monkeypatch):
     assert "# Fase 1" in (tmp_path / "reports" / "fase1_neteja.md").read_text(encoding="utf-8")
 
 
-def test_mark_duplicates_respeta_la_revision_manual():
+def test_mark_duplicates_respecta_la_revisio_manual():
     df = pd.DataFrame(
         {
             "id": ["racc-1036", "racc-1053", "racc-72", "racc-80", "racc-757", "racc-758",
@@ -251,23 +251,23 @@ def test_mark_duplicates_respeta_la_revision_manual():
         }
     )  # fmt: skip
     out = mark_duplicates(df).set_index("id")
-    # duplicado manual: se conserva el más reciente, que pasa a encabezar el grupo
+    # duplicat manual: es conserva el més recent, que passa a encapçalar el grup
     assert out.loc["racc-1036", "flag_duplicat"]
     assert out.loc["racc-1036", "duplicat_de"] == "racc-1053"
     assert set(out.loc[["racc-1036", "racc-1053"], "grup_viatge"]) == {"racc-1053"}
-    # independientes: cada uno su grupo
+    # independents: cadascun el seu grup
     assert out.loc["racc-80", "grup_viatge"] == "racc-80"
-    # complementarios: un grupo y resuelto
+    # complementaris: un grup i resolt
     assert set(out.loc[["racc-757", "racc-758"], "grup_viatge"]) == {"racc-757"}
     assert not out.loc[["racc-72", "racc-757", "racc-1053"], "flag_possible_desdoblament"].any()
-    # pendiente: sigue marcado
+    # pendent: continua marcat
     assert out.loc[["e-1", "e-2"], "flag_possible_desdoblament"].all()
 
 
-def test_mark_duplicates_rechaza_decisiones_desconocidas():
+def test_mark_duplicates_rebutja_decisions_desconegudes():
     df = pd.DataFrame(
         {"id": ["a"], "nom": ["X"], "data_inici_clean": ["2020-01-01"], "total_clean": [1.0],
-         "revisio_desdoblament": ["quizas"]}
+         "revisio_desdoblament": ["potser"]}
     )  # fmt: skip
-    with pytest.raises(ValueError, match="quizas"):
+    with pytest.raises(ValueError, match="potser"):
         mark_duplicates(df)

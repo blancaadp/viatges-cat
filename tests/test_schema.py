@@ -1,7 +1,7 @@
 from viatges.schema import COLUMNS, field_mapping
 
 
-def test_mapea_por_nombre_visible_e_ignora_internas():
+def test_mapeja_pel_nom_visible_i_ignora_les_internes():
     meta = {
         "columns": [
             {"name": "Unitat  orgànica", "fieldName": "unitat_org_nica"},

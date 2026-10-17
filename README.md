@@ -1,35 +1,35 @@
 # viatges-cat
 
-Análisis independiente de los viajes al extranjero de los altos cargos y del personal directivo de la Generalitat de Catalunya.
+Anàlisi independent dels viatges a l'estranger dels alts càrrecs i del personal directiu de la Generalitat de Catalunya.
 
-> **Esta no es una web oficial.** Los datos provienen del conjunto
+> **Aquest no és un web oficial.** Les dades provenen del conjunt
 > [Viatges a l'estranger dels alts càrrecs i personal directiu de la Generalitat de Catalunya](https://analisi.transparenciacatalunya.cat/d/5kte-hque),
-> publicado en el portal de Dades Obertes de Catalunya, y se muestran con finalidad informativa.
-> Un viaje estadísticamente atípico no implica ninguna irregularidad.
+> publicat al portal de Dades Obertes de Catalunya, i es mostren amb finalitat informativa.
+> Un viatge estadísticament atípic no implica cap irregularitat.
 
-## Estado
+## Estat
 
-🚧 **Fase 1 — Limpieza y normalización.**
+🚧 **Fase 1 — Neteja i normalització.**
 
-| Fase | Descripción | Estado |
-|------|-------------|--------|
-| 0 | Ingesta cruda vía API SODA e inventario de calidad | ✅ |
-| 1 | Limpieza y normalización (destinos, importes, fechas) | 🚧 |
-| 2 | Almacenamiento y detección de cambios entre instantáneas | ⏳ |
-| 3 | Automatización semanal (GitHub Actions) | ⏳ |
+| Fase | Descripció | Estat |
+|------|------------|-------|
+| 0 | Ingesta en cru via API SODA i inventari de qualitat | ✅ |
+| 1 | Neteja i normalització (destinacions, imports, dates) | 🚧 |
+| 2 | Emmagatzematge i detecció de canvis entre instantànies | ⏳ |
+| 3 | Automatització setmanal (GitHub Actions) | ⏳ |
 | 4 | Web pública | ⏳ |
-| 5 | Modelo de coste esperado y viajes atípicos | ⏳ |
+| 5 | Model de cost esperat i viatges atípics | ⏳ |
 
-## Uso
+## Ús
 
-Requiere [uv](https://docs.astral.sh/uv/).
+Cal tenir [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uv sync                       # instala dependencias
-cp .env.example .env          # opcional: añade tu SODA_APP_TOKEN
-uv run viatges ingest         # descarga una instantánea en data/raw/
-uv run viatges profile        # genera reports/fase0_inventario.md
-uv run viatges clean          # genera data/processed/<instantánea>/ y reports/fase1_neteja.md
+uv sync                       # instal·la les dependències
+cp .env.example .env          # opcional: hi afegeixes la teva SODA_APP_TOKEN
+uv run viatges ingest         # descarrega una instantània a data/raw/
+uv run viatges profile        # genera reports/fase0_inventari.md
+uv run viatges clean          # genera data/processed/<instantània>/ i reports/fase1_neteja.md
 uv run pytest                 # tests
 ```
 
@@ -37,20 +37,20 @@ uv run pytest                 # tests
 
 ```
 src/viatges/
-  config.py      configuración (dataset, rutas, token)
-  soda.py        cliente de la API SODA con paginación y reintentos
-  schema.py      esquema esperado y mapeo de columnas de la API
-  ingest.py      descarga instantáneas crudas e inmutables
-  profiling.py   inventario de calidad de datos (Fase 0)
-  clean.py       limpieza y normalización (Fase 1, reglas en el ADR 0002)
-  cli.py         comandos `viatges ingest`, `viatges profile` y `viatges clean`
-data/manual/     diccionarios y correcciones manuales (versionados)
-docs/decisions/  registro de decisiones de arquitectura (ADR)
-reports/         informes generados
-notebooks/       exploración libre (importando el paquete)
+  config.py      configuració (dataset, rutes, token)
+  soda.py        client de l'API SODA amb paginació i reintents
+  schema.py      esquema esperat i mapatge de columnes de l'API
+  ingest.py      descarrega instantànies en cru i immutables
+  profiling.py   inventari de qualitat de les dades (Fase 0)
+  clean.py       neteja i normalització (Fase 1, regles a l'ADR 0002)
+  cli.py         ordres `viatges ingest`, `viatges profile` i `viatges clean`
+data/manual/     diccionaris i correccions manuals (versionats)
+docs/decisions/  registre de decisions d'arquitectura (ADR)
+reports/         informes generats
+notebooks/       exploració lliure (important el paquet)
 ```
 
-## Fuente de datos
+## Font de les dades
 
 [Dades Obertes de Catalunya](https://analisi.transparenciacatalunya.cat/d/5kte-hque) · Generalitat de Catalunya.
-Consulta las condiciones de reutilización en el propio portal.
+Consulta les condicions de reutilització al mateix portal.

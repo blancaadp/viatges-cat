@@ -1,29 +1,29 @@
-# Fase 0 · Inventario de calidad de datos
+# Fase 0 · Inventari de qualitat de les dades
 
-_Generado el 2026-10-17 17:44 UTC a partir de la instantánea descargada el 2026-09-29T16:51:11.327707+00:00._
+_Generat el 2026-10-17 18:04 UTC a partir de la instantània descarregada el 2026-09-29T16:51:11.327707+00:00._
 
-## Resumen
+## Resum
 
-- Filas: **1511**
-- Última actualización de filas según el portal: 2026-09-29T09:28:48+00:00
-- Rango de fechas de inicio: 2017-01-29 → 2026-09-10
-- Departamentos distintos: 39 · Personas distintas: 284
-- Columnas inesperadas en el esquema: ninguna
-- Columnas esperadas que faltan: ninguna
+- Files: **1511**
+- Darrera actualització de files segons el portal: 2026-09-29T09:28:48+00:00
+- Interval de dates d'inici: 2017-01-29 → 2026-09-10
+- Departaments diferents: 39 · Persones diferents: 284
+- Columnes inesperades a l'esquema: cap
+- Columnes esperades que falten: cap
 
-## Importes
+## Imports
 
-- Registros sin total: 2
-- Registros con total 0: 101
-- Importes negativos: 0
-- Registros donde la suma de partidas no coincide con el total: 2
+- Registres sense total: 2
+- Registres amb total 0: 101
+- Imports negatius: 0
+- Registres on la suma de partides no coincideix amb el total: 2
 
 |      | id        |   dietes |   allotjament |   transport |   altres_despeses |   total |   diferencia |
 |-----:|:----------|---------:|--------------:|------------:|------------------:|--------:|-------------:|
 | 1385 | racc-1725 |      682 |          1912 |        4164 |                 0 |    6760 |            2 |
 | 1389 | racc-1768 |      176 |           857 |        1057 |               465 |    2557 |            2 |
 
-### Valores que no se pueden leer como número
+### Valors que no es poden llegir com a número
 
 ```
 {
@@ -35,7 +35,7 @@ _Generado el 2026-10-17 17:44 UTC a partir de la instantánea descargada el 2026
 }
 ```
 
-### Estadísticos descriptivos
+### Estadístics descriptius
 
 |                 |   count |    mean |     std |   min |    25% |     50% |     75% |    max |
 |:----------------|--------:|--------:|--------:|------:|-------:|--------:|--------:|-------:|
@@ -45,7 +45,7 @@ _Generado el 2026-10-17 17:44 UTC a partir de la instantánea descargada el 2026
 | altres_despeses |    1509 |  413.18 | 1524.67 |     0 |   0    |   44.3  |  162.1  |  33708 |
 | total           |    1509 | 3168.72 | 7986.02 |     0 | 570.02 | 1055.75 | 2720.86 | 134778 |
 
-### Mismo importe en registros distintos (¿gasto compartido?)
+### Mateix import en registres diferents (despesa compartida?)
 
 |    | columna   |   import | ids                                      |
 |---:|:----------|---------:|:-----------------------------------------|
@@ -75,9 +75,9 @@ _Generado el 2026-10-17 17:44 UTC a partir de la instantánea descargada el 2026
 | 23 | dietes    |    27.2  | racc-360, racc-1684                      |
 | 24 | dietes    |    29    | racc-755, racc-433, CMH052               |
 
-## Fechas
+## Dates
 
-Valores que no se pueden leer como fecha:
+Valors que no es poden llegir com a data:
 
 ```
 {
@@ -86,12 +86,12 @@ Valores que no se pueden leer como fecha:
 }
 ```
 
-- Fechas de inicio en el futuro: 0
-- Registros con fin anterior al inicio: 0
+- Dates d'inici en el futur: 0
+- Registres amb el final anterior a l'inici: 0
 
-_Ninguno._
+_Cap._
 
-Duración en días (inclusive):
+Durada en dies (inclosos):
 
 |       |      0 |
 |:------|-------:|
@@ -104,7 +104,7 @@ Duración en días (inclusive):
 | 75%   |    4   |
 | max   |  156   |
 
-Viajes de más de 21 días (revisar):
+Viatges de més de 21 dies (revisar):
 
 |      | id        | destinacio           | data_inici          | data_fi             |
 |-----:|:----------|:---------------------|:--------------------|:--------------------|
@@ -114,10 +114,10 @@ Viajes de más de 21 días (revisar):
 | 1325 | racc-1699 | Bogotá (Colòmbia)    | 2025-11-03 00:00:00 | 2025-12-09 00:00:00 |
 | 1395 | racc-1148 | Perpinyà (França)    | 2024-01-19 00:00:00 | 2024-03-19 00:00:00 |
 
-## Duplicados
+## Duplicats
 
-- Ids duplicados: 0
-- Misma persona, fecha y destino: 18 registros
+- Ids duplicats: 0
+- Mateixa persona, data i destinació: 18 registres
 
 |      | id            | nom                     | data_inici              | destinacio                         |
 |-----:|:--------------|:------------------------|:------------------------|:-----------------------------------|
@@ -140,12 +140,12 @@ Viajes de más de 21 días (revisar):
 | 1496 | raccERGO-2095 | Alberto Lacasta Huelin  | 2026-07-31T00:00:00.000 | Amsterdam (Països Baixos)          |
 | 1506 | raccERGO-2128 | Alberto Lacasta Huelin  | 2026-07-31T00:00:00.000 | Amsterdam (Països Baixos)          |
 
-## Destinos
+## Destinacions
 
-- Valores distintos del campo destino: 465
-- Viajes con varios destinos: 139
+- Valors diferents del camp destinació: 465
+- Viatges amb diverses destinacions: 139
 
-### Tramos sin país entre paréntesis
+### Trams sense país entre parèntesis
 
 | tram                                                                          |   count |
 |:------------------------------------------------------------------------------|--------:|
@@ -170,7 +170,7 @@ Viajes de más de 21 días (revisar):
 | Tànger (Marrroc) i Rabat (Marroc)                                             |       1 |
 | Tokio                                                                         |       1 |
 
-### Posibles problemas de codificación
+### Possibles problemes de codificació
 
 |     | tram             |
 |----:|:-----------------|
@@ -178,7 +178,7 @@ Viajes de más de 21 días (revisar):
 | 318 | Gda?sk (Polònia) |
 | 457 | Atmak?r (Índia)  |
 
-### Posibles variantes de la misma ciudad (heurística, revisar)
+### Possibles variants de la mateixa ciutat (heurística, revisar)
 
 | clau   | variants                                                          |   n_variants |   n_registres |
 |:-------|:------------------------------------------------------------------|-------------:|--------------:|
@@ -203,7 +203,7 @@ Viajes de más de 21 días (revisar):
 | estra  | Estrasbug | Estrasburg                                            |            2 |             8 |
 | telav  | Tel Aviv | Tel-Aviv                                               |            2 |             8 |
 
-### Países más frecuentes (tal como vienen escritos)
+### Països més freqüents (tal com vénen escrits)
 
 | pais                   |   count |
 |:-----------------------|--------:|
@@ -223,22 +223,22 @@ Viajes de más de 21 días (revisar):
 | Xina                   |      30 |
 | Països Baixos          |      29 |
 
-## Campos de texto: nulos y valores de relleno
+## Camps de text: nuls i valors de farciment
 
-|                        |   nulos |   relleno_o_vacios |   valores_distintos |
-|:-----------------------|--------:|-------------------:|--------------------:|
-| observacions           |     108 |               1026 |                 465 |
-| comitiva               |      61 |                562 |                 903 |
-| altres_despeses_detall |      83 |                462 |                 746 |
-| agenda                 |      26 |                 39 |                1398 |
-| carrec                 |       0 |                  0 |                 312 |
-| departament            |       0 |                  0 |                  39 |
-| destinacio             |       0 |                  0 |                 465 |
-| id                     |       0 |                  0 |                1511 |
-| motiu                  |       0 |                  0 |                1319 |
-| nom                    |       0 |                  0 |                 284 |
-| unitat_organica        |       0 |                  0 |                 238 |
+|                        |   nuls |   farciment_o_buits |   valors_diferents |
+|:-----------------------|-------:|--------------------:|-------------------:|
+| observacions           |    108 |                1026 |                465 |
+| comitiva               |     61 |                 562 |                903 |
+| altres_despeses_detall |     83 |                 462 |                746 |
+| agenda                 |     26 |                  39 |               1398 |
+| carrec                 |      0 |                   0 |                312 |
+| departament            |      0 |                   0 |                 39 |
+| destinacio             |      0 |                   0 |                465 |
+| id                     |      0 |                   0 |               1511 |
+| motiu                  |      0 |                   0 |               1319 |
+| nom                    |      0 |                   0 |                284 |
+| unitat_organica        |      0 |                   0 |                238 |
 
-## Decisiones de limpieza
+## Decisions de neteja
 
-_Las reglas para cada problema de este informe están en [docs/decisions/0002-reglas-de-limpieza.md](../docs/decisions/0002-reglas-de-limpieza.md). Si aparece un problema nuevo, añádelo allí antes de tocar el código._
+_Les regles per a cada problema d'aquest informe són a [docs/decisions/0002-regles-de-neteja.md](../docs/decisions/0002-regles-de-neteja.md). Si apareix un problema nou, afegeix-lo allà abans de tocar el codi._

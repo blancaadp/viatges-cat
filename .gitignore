@@ -1,9 +1,9 @@
-# Secretos
+# Secrets
 .env
 
-# Datos descargados (se regeneran con `uv run viatges ingest`)
+# Dades descarregades (es regeneren amb `uv run viatges ingest`)
 data/*
-# …excepto los diccionarios y correcciones manuales, que son código
+# …excepte els diccionaris i les correccions manuals, que són codi
 !data/manual/
 
 # Python

@@ -1,16 +1,16 @@
-# Fase 1 · Resultado de la limpieza
+# Fase 1 · Resultat de la neteja
 
-_Instantánea descargada el 2026-09-29T16:51:11.327707+00:00. Reglas: [ADR 0002](../docs/decisions/0002-reglas-de-limpieza.md)._
+_Instantània descarregada el 2026-09-29T16:51:11.327707+00:00. Regles: [ADR 0002](../docs/decisions/0002-regles-de-neteja.md)._
 
-- Viajes: **1511** · tramos de destino: **1733**
-- Correcciones manuales aplicadas: 23
-- Ciudades distintas tras normalizar: 327 (antes 403)
-- Países distintos: 82
-- Departamentos sin ámbito asignado: 0
+- Viatges: **1511** · trams de destinació: **1733**
+- Correccions manuals aplicades: 23
+- Ciutats diferents després de normalitzar: 327 (abans 403)
+- Països diferents: 82
+- Departaments sense àmbit assignat: 0
 
-## Señales (`flag_*`)
+## Senyals (`flag_*`)
 
-|                            |   registros |
+|                            |   registres |
 |:---------------------------|------------:|
 | flag_total_calculat        |           1 |
 | flag_redondeig             |           2 |
@@ -22,7 +22,7 @@ _Instantánea descargada el 2026-09-29T16:51:11.327707+00:00. Reglas: [ADR 0002]
 | flag_desti_sense_pais      |           0 |
 | flag_no_estranger          |           5 |
 
-## Motivo de los importes a cero
+## Motiu dels imports a zero
 
 | motiu_import_zero   |   count |
 |:--------------------|--------:|
@@ -31,7 +31,7 @@ _Instantánea descargada el 2026-09-29T16:51:11.327707+00:00. Reglas: [ADR 0002]
 | pagat_per_tercers   |      17 |
 | pendent             |      10 |
 
-## Duplicados descartados
+## Duplicats descartats
 
 | id            | duplicat_de   | nom                       |   total_clean |
 |:--------------|:--------------|:--------------------------|--------------:|
@@ -50,24 +50,24 @@ _Instantánea descargada el 2026-09-29T16:51:11.327707+00:00. Reglas: [ADR 0002]
 | raccERGO-1855 | racc-1633     | Laura Foraster i Lloret   |      29906.8  |
 | raccERGO-2095 | raccERGO-2128 | Alberto Lacasta Huelin    |       4379.48 |
 
-## Posibles desdoblamientos (revisar)
+## Possibles desdoblaments (revisar)
 
 | grup_viatge   | id            | nom                     | data_inici_clean   |   total_clean |
 |:--------------|:--------------|:------------------------|:-------------------|--------------:|
 | raccERGO-2047 | raccERGO-2047 | Elisabet Cirici i Amell | 2026-05-19         |       1657.8  |
 | raccERGO-2047 | raccERGO-2068 | Elisabet Cirici i Amell | 2026-05-19         |       1371.03 |
 
-## Pendiente de completar en `data/manual/`
+## Pendent de completar a `data/manual/`
 
-### Países sin mapear (`paisos.csv`)
+### Països sense mapejar (`paisos.csv`)
 
-_Ninguno._
+_Cap._
 
-### Tramos sin país
+### Trams sense país
 
-_Ninguno._
+_Cap._
 
-### Ciudades que aún parecen variantes (`ciutats.csv`, heurística)
+### Ciutats que encara semblen variants (`ciutats.csv`, heurística)
 
 | clau   | variants                                        |   n_variants |   n_registres |
 |:-------|:------------------------------------------------|-------------:|--------------:|
@@ -80,6 +80,6 @@ _Ninguno._
 | santa  | Santa Coloma d'Andorra | Santander de Quilichao |            2 |             2 |
 | villa  | Villach | Villavicencio                         |            2 |             2 |
 
-### Departamentos sin ámbito (`departaments.csv`)
+### Departaments sense àmbit (`departaments.csv`)
 
-_Ninguno._
+_Cap._
