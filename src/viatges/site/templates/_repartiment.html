@@ -1,4 +1,4 @@
-{# Distribució percentual de la despesa per partida: llegenda, barra al 100 % i taula. #}
+{# Distribució percentual de la despesa per partida: llegenda, barra al 100 % i taules. #}
 {% macro llegenda() %}
 <ul class="legend" aria-label="Partides">
   {% for i, label in categories %}<li><span class="swatch c{{ i }}"></span>{{ label }}</li>{% endfor %}
@@ -11,27 +11,69 @@
 </span>
 {% endmacro %}
 
-{# rows: label, href, n, total, shares #}
+{# Capçalera ordenable: col = índex de la columna; tipus = "text" o "num" #}
+{% macro cap(text, col, tipus="num", ordre=none, classe="num") %}
+<th scope="col" class="{{ classe }}"><button data-col="{{ col }}" data-type="{{ tipus }}"{% if ordre %} aria-sort="{{ ordre }}"{% endif %}>{{ text }}</button></th>
+{% endmacro %}
+
+{# rows: label, href, n, n_val, total, shares. Ordenable per qualsevol columna, també per partida. #}
 {% macro taula(rows, primera) %}
 <div class="table-wrap flat">
-  <table class="data split">
+  <table class="data split sortable">
     <thead>
       <tr>
-        <th scope="col">{{ primera }}</th>
-        <th scope="col" class="num">Viatges</th>
-        <th scope="col" class="num">Total</th>
+        {{ cap(primera, 0, "text", classe="") }}
+        {{ cap("Viatges", 1) }}
+        {{ cap("Total", 2, ordre="descending") }}
         <th scope="col">Distribució</th>
-        {% for i, label in categories %}<th scope="col" class="num hide-sm">{{ label }}</th>{% endfor %}
+        {% for i, label in categories %}{{ cap(label, 4 + i, classe="num hide-sm") }}{% endfor %}
       </tr>
     </thead>
     <tbody>
       {% for r in rows %}
       <tr>
-        <td><a href="{{ r.href }}">{{ r.label }}</a></td>
-        <td class="num">{{ r.n }}</td>
-        <td class="num">{{ r.total }}</td>
+        <td data-v="{{ r.label }}">{% if r.href %}<a href="{{ r.href }}">{{ r.label }}</a>{% else %}{{ r.label }}{% endif %}</td>
+        <td class="num" data-v="{{ r.n_val }}">{{ r.n }}</td>
+        <td class="num" data-v="{{ '%.2f' % r.shares.total }}">{{ r.total }}</td>
         <td class="stack-cell">{{ barra(r.shares) }}</td>
-        {% for p in r.shares.parts %}<td class="num hide-sm">{{ p.pct_text }}</td>{% endfor %}
+        {% for p in r.shares.parts %}<td class="num hide-sm" data-v="{{ '%.3f' % p.pct }}">{{ p.pct_text }}</td>{% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endmacro %}
+
+{# Taula de destinacions (país o ciutat), ordenable. rows: label, href, n, persones, total, per_viatge, shares #}
+{% macro taula_destinacions(rows, primera) %}
+<div class="table-wrap flat">
+  <table class="data split sortable">
+    <thead>
+      <tr>
+        {{ cap(primera, 0, "text", classe="") }}
+        {{ cap("Viatges", 1) }}
+        {{ cap("Persones", 2, classe="num hide-sm") }}
+        {{ cap("Despesa", 3, ordre="descending") }}
+        {{ cap("Per viatge", 4, classe="num hide-sm") }}
+        <th scope="col">Distribució</th>
+        {% for i, label in categories %}{{ cap(label, 6 + i, classe="num hide-sm") }}{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td data-v="{{ r.label }}">{% if r.href %}<a href="{{ r.href }}">{{ r.label }}</a>{% else %}{{ r.label }}{% endif %}</td>
+        <td class="num" data-v="{{ r.n }}">{{ r.n }}</td>
+        <td class="num hide-sm" data-v="{{ r.persones }}">{{ r.persones }}</td>
+        <td class="num" data-v="{{ '%.2f' % r.total }}">{{ r.total | eur }}</td>
+        <td class="num hide-sm" data-v="{{ '%.2f' % r.per_viatge }}">{{ r.per_viatge | eur }}</td>
+        {% if r.shares %}
+        <td class="stack-cell">{{ barra(r.shares) }}</td>
+        {% for p in r.shares.parts %}<td class="num hide-sm" data-v="{{ '%.3f' % p.pct }}">{{ p.pct_text }}</td>{% endfor %}
+        {% else %}
+        <td class="stack-cell muted">—</td>
+        {% for i, label in categories %}<td class="num hide-sm" data-v="-1">—</td>{% endfor %}
+        {% endif %}
       </tr>
       {% endfor %}
     </tbody>

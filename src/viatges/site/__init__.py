@@ -219,6 +219,7 @@ class SiteData:
     trams: pd.DataFrame
     instantanies: pd.DataFrame
     correccions: pd.DataFrame
+    sexe: pd.DataFrame  # correccions manuals del sexe (persona_id, sexe, motiu)
 
 
 def load(db_path: Path, manual_dir: Path) -> SiteData:
@@ -232,7 +233,13 @@ def load(db_path: Path, manual_dir: Path) -> SiteData:
     for col in [c for c in viatges.columns if c.startswith("flag_")] + ["exclos_analisi"]:
         viatges[col] = viatges[col].fillna(0).astype(bool)
     correccions = pd.read_csv(manual_dir / "correccions.csv", dtype="string")
-    return SiteData(viatges, trams, instantanies, correccions)
+    sexe_csv = manual_dir / "sexe.csv"
+    sexe = (
+        pd.read_csv(sexe_csv, dtype="string")
+        if sexe_csv.exists()
+        else pd.DataFrame(columns=["persona_id", "sexe", "motiu"], dtype="string")
+    )
+    return SiteData(viatges, trams, instantanies, correccions, sexe)
 
 
 def analysis_set(viatges: pd.DataFrame) -> pd.DataFrame:
@@ -379,6 +386,7 @@ def people_context(data: SiteData, base: str) -> dict:
         "min_trips": MIN_TRIPS_DAILY,
         "n_persones": data.viatges["persona_id"].nunique(),
         "people": people_directory(data, table),
+        "gender": gender_context(data),
     }
 
 
@@ -395,6 +403,7 @@ def category_rows(counted: pd.DataFrame, person_ids, table: pd.DataFrame, base: 
                 "label": table.loc[pid, "persona"],
                 "href": f"{base}persona/{pid}/",
                 "n": fmt_int(len(trips)),
+                "n_val": len(trips),
                 "total": fmt_eur(shares["total"]),
                 "shares": shares,
             }
@@ -525,6 +534,182 @@ def person_context(pid: str, data: SiteData, table: pd.DataFrame, base: str) -> 
     }
 
 
+# ---------------------------------------------------------------------------
+# Sexe (estimat) i destinacions
+# ---------------------------------------------------------------------------
+
+# El conjunt de dades no publica el sexe. Els càrrecs en català són marcats en gènere
+# («consellera» / «conseller»), de manera que s'estima a partir de la primera paraula del
+# càrrec. Els càrrecs neutres («gerent», «cap») es resolen a `data/manual/sexe.csv`.
+FEMENINS = {"directora", "secretaria", "consellera", "delegada", "presidenta", "vicepresidenta",
+            "comissionada", "viceconsellera", "sotssecretaria", "subdirectora", "coordinadora",
+            "adjunta", "assessora"}  # fmt: skip
+MASCULINS = {"director", "secretari", "conseller", "delegat", "president", "vicepresident",
+             "comissionat", "viceconseller", "sotssecretari", "subdirector", "coordinador",
+             "adjunt", "assessor"}  # fmt: skip
+SEXES = ("Dones", "Homes")
+
+
+def person_sex(viatges: pd.DataFrame, overrides: pd.DataFrame) -> pd.Series:
+    """Sexe estimat de cada persona (`Dones` / `Homes`), indexat per `persona_id`.
+
+    Es compta el gènere de la primera paraula del càrrec en tots els registres de la
+    persona i guanya el més freqüent; un empat o cap càrrec amb gènere queda sense
+    classificar, tret que `sexe.csv` ho indiqui.
+    """
+    first = viatges["carrec"].fillna("").map(lambda c: _key(c).split()[0] if c.strip() else "")
+    votes = (
+        pd.DataFrame(
+            {
+                "persona_id": viatges["persona_id"],
+                "Dones": first.isin(FEMENINS),
+                "Homes": first.isin(MASCULINS),
+            }
+        )
+        .groupby("persona_id")
+        .sum()
+    )
+    sex = pd.Series(pd.NA, index=votes.index, dtype="object")
+    sex[votes["Dones"] > votes["Homes"]] = "Dones"
+    sex[votes["Homes"] > votes["Dones"]] = "Homes"
+    for r in overrides.itertuples():
+        if r.persona_id in sex.index:
+            sex[r.persona_id] = {"dona": "Dones", "home": "Homes"}[str(r.sexe).lower()]
+    return sex
+
+
+def gender_context(data: SiteData) -> dict:
+    counted = analysis_set(data.viatges)
+    sex = person_sex(data.viatges, data.sexe)
+    counted = counted.assign(sexe=counted["persona_id"].map(sex))
+    known = counted[counted["total_eur"].notna() & counted["durada_dies"].notna()]
+    per_person = counted.groupby(["sexe", "persona_id"])["total_eur"].sum()
+    people_total = counted["persona_id"].nunique()
+    spend_total = float(counted["total_eur"].sum())
+    rows = []
+    for label in SEXES:
+        trips = counted[counted["sexe"] == label]
+        if trips.empty:
+            continue
+        persons = per_person[label]
+        shares = category_shares(trips)
+        k = known[known["sexe"] == label]
+        spend = float(trips["total_eur"].sum())
+        daily = k["total_eur"].sum() / k["durada_dies"].sum() if k["durada_dies"].sum() else None
+        rows.append(
+            {
+                "label": label,
+                "article": f"{'Les' if label == 'Dones' else 'Els'} {label.lower()}",
+                "persones": fmt_int(len(persons)),
+                "pct_persones": fmt_pct(len(persons) / people_total * 100),
+                "viatges": fmt_int(len(trips)),
+                "total": fmt_eur(spend),
+                "pct_total": fmt_pct(spend / spend_total * 100),
+                "per_persona": fmt_eur(spend / len(persons)),
+                "mediana": fmt_eur(persons.median()),
+                "per_viatge": fmt_eur(spend / len(trips)),
+                "per_dia": fmt_eur(daily),
+                "shares": shares,
+                "value": spend,
+                "mean": spend / len(persons),
+                "median": float(persons.median()),
+            }
+        )
+    top = max(rows, key=lambda r: r["value"]) if rows else None
+    top_mean = max(rows, key=lambda r: r["mean"]) if rows else None
+    top_median = max(rows, key=lambda r: r["median"]) if rows else None
+    return {
+        "rows": rows,
+        "top": top,
+        "top_mean": top_mean,
+        "top_median": top_median,
+        "n_sense": int(sex.isna().sum()),
+    }
+
+
+def destination_table(data: SiteData, level: str, base: str) -> list[dict]:
+    """Una fila per país (`pais`) o ciutat (`ciutat`), sense l'Estat espanyol.
+
+    Quan un viatge té diverses destinacions, la seva despesa es reparteix a parts iguals
+    entre les destinacions diferents (així la suma no compta dues vegades el mateix import).
+    """
+    v = analysis_set(data.viatges)
+    names = country_names(data.trams)
+    t = data.trams[data.trams["id"].isin(v["id"])]
+    t = t[t["iso2"].notna() & (t["iso2"] != "ES")].copy()
+    if level == "pais":
+        t["dest"] = t["iso2"]
+        t["label"] = t["iso2"].map(lambda i: names.get(i, i))
+    else:
+        t = t[t["ciutat"].notna()]
+        t["dest"] = t["ciutat"] + "|" + t["iso2"]
+        t["label"] = t["ciutat"] + " (" + t["iso2"].map(lambda i: names.get(i, i)) + ")"
+    t = t.drop_duplicates(["id", "dest"])
+    t["w"] = 1 / t.groupby("id")["dest"].transform("size")
+    cols = ["total_eur", *(c for c, _ in CATEGORIES)]
+    m = t[["id", "dest", "label", "iso2", "w"]].merge(
+        v[["id", "persona_id", *cols]], on="id", validate="m:1"
+    )
+    m[cols] = m[cols].mul(m["w"], axis=0)
+    rows = []
+    for _dest, g in m.groupby("dest"):
+        n = len(g)
+        total = float(g["total_eur"].sum())
+        label = g["label"].iloc[0]
+        rows.append(
+            {
+                "label": label,
+                "href": f"{base}viatges/?pais={g['iso2'].iloc[0]}" if level == "pais" else None,
+                "n": n,
+                "persones": int(g["persona_id"].nunique()),
+                "total": total,
+                "per_viatge": total / n,
+                "shares": category_shares(g),
+                "tip": f"{label}: {fmt_eur(total)} · {fmt_int(n)} viatges",
+            }
+        )
+    return rows
+
+
+def destinations_context(data: SiteData, base: str) -> dict:
+    out = {}
+    for level, key in (("pais", "paisos"), ("ciutat", "ciutats")):
+        rows = destination_table(data, level, base)
+        by_total = sorted(rows, key=lambda r: r["total"], reverse=True)
+        by_n = sorted(rows, key=lambda r: (r["n"], r["total"]), reverse=True)
+        out[key] = {
+            "n": len(rows),
+            "by_total": bar_rows(
+                [
+                    BarRow(r["label"], r["total"], fmt_compact_eur(r["total"]), r["tip"], r["href"])
+                    for r in by_total[:15]
+                ]
+            ),
+            "by_n": bar_rows(
+                [
+                    BarRow(r["label"], float(r["n"]), fmt_int(r["n"]), r["tip"], r["href"])
+                    for r in by_n[:15]
+                ]
+            ),
+            "table": by_total[: 40 if level == "ciutat" else len(by_total)],
+        }
+    abroad = analysis_set(data.viatges)
+    abroad = abroad[
+        abroad["id"].isin(
+            data.trams.loc[data.trams["iso2"].notna() & (data.trams["iso2"] != "ES"), "id"]
+        )
+    ]
+    out["kpis"] = [
+        ("Països visitats", fmt_int(out["paisos"]["n"])),
+        ("Ciutats", fmt_int(out["ciutats"]["n"])),
+        ("Viatges a l'estranger", fmt_int(len(abroad))),
+        ("Despesa d'aquests viatges", fmt_compact_eur(abroad["total_eur"].sum())),
+    ]
+    out["fmt_eur"] = fmt_eur
+    out["fmt_int"] = fmt_int
+    return out
+
+
 def departments_context(data: SiteData, base: str) -> dict:
     v = analysis_set(data.viatges)
     rows = []
@@ -537,12 +722,12 @@ def departments_context(data: SiteData, base: str) -> dict:
                 "label": ambit,
                 "href": f"{base}departament/{slug(ambit)}/",
                 "n": fmt_int(len(trips)),
+                "n_val": len(trips),
                 "total": fmt_eur(shares["total"]),
                 "shares": shares,
-                "sort": shares["total"],
             }
         )
-    rows.sort(key=lambda r: r["sort"], reverse=True)
+    rows.sort(key=lambda r: r["shares"]["total"], reverse=True)
     overall = category_shares(v)
     return {"rows": rows, "overall": overall}
 
@@ -729,6 +914,8 @@ def build_site(db_path: Path, manual_dir: Path, out_dir: Path, base: str = "/") 
     for ambit in data.viatges["ambit"].dropna().unique():
         render("departament.html", f"departament/{slug(ambit)}/index.html", page="departaments",
                **department_context(ambit, data, base))  # fmt: skip
+    render("destinacions.html", "destinacions/index.html", page="destinacions",
+           **destinations_context(data, base))  # fmt: skip
     table = people_table(data)
     for pid in data.viatges["persona_id"].unique():
         render("persona.html", f"persona/{pid}/index.html", page="persones",

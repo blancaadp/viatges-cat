@@ -12,6 +12,7 @@ from viatges.site import (
     fmt_date,
     fmt_eur,
     linkify,
+    person_sex,
 )
 from viatges.store import build_database
 
@@ -123,3 +124,35 @@ def test_pagines_de_departaments_i_distribucio_per_persona(site):
     assert "En què gasta cada persona" in (site / "persones" / "index.html").read_text(
         encoding="utf-8"
     )
+
+
+def test_sexe_estimat_pel_genere_del_carrec():
+    v = pd.DataFrame(
+        {
+            "persona_id": ["a", "b", "c", "c", "d", "e"],
+            "carrec": [
+                "Consellera de Cultura",
+                "director general d'Afers",
+                "directora general",
+                "director general",  # empat: queda sense classificar
+                "gerent de la Fundació",  # neutre
+                None,
+            ],
+        }
+    )
+    overrides = pd.DataFrame({"persona_id": ["d"], "sexe": ["home"], "motiu": ["x"]})
+    sex = person_sex(v, overrides)
+    assert sex["a"] == "Dones"
+    assert sex["b"] == "Homes"
+    assert pd.isna(sex["c"])
+    assert sex["d"] == "Homes"  # la correcció manual preval
+    assert pd.isna(sex["e"])
+
+
+def test_pagina_de_destinacions_i_sense_sexe_si_no_es_pot_estimar(site):
+    page = (site / "destinacions" / "index.html").read_text(encoding="utf-8")
+    assert "Destinacions" in page
+    assert 'class="data split sortable"' in page
+    persones = (site / "persones" / "index.html").read_text(encoding="utf-8")
+    # Sense càrrecs amb gènere no es pot estimar el sexe: la secció no es mostra
+    assert 'id="sexe"' not in persones

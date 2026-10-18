@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_repartiment.html" import llegenda, taula with context %}
+{% from "_repartiment.html" import llegenda, barra, taula with context %}
 {% block title %}Persones · Viatges dels alts càrrecs{% endblock %}
 {% block content %}
 <h1>Persones</h1>
@@ -75,6 +75,51 @@
     despesa de tota la comitiva, i per això la seva despesa diària és més alta.
     <a href="{{ base }}metodologia/">Més detalls</a>.</p>
 </section>
+
+{% if gender.rows %}
+<section class="card" id="sexe">
+  <h2>Despesa per sexe</h2>
+  <p class="sub">{{ gender.top.article }} concentren el {{ gender.top.pct_total }} de la despesa
+    ({{ gender.top.pct_persones }} de les persones).
+    Per persona, la despesa <strong>mitjana</strong> és més alta en {{ gender.top_mean.label | lower }}
+    ({{ gender.top_mean.per_persona }}){% if gender.top_median.label != gender.top_mean.label %}, però la
+    <strong>mediana</strong> és més alta en {{ gender.top_median.label | lower }} ({{ gender.top_median.mediana }}):
+    unes poques persones amb molta despesa fan pujar la mitjana{% else %} i també la mediana ({{ gender.top_median.mediana }}){% endif %}.
+    Només compten els viatges que entren a les xifres.</p>
+  <div class="table-wrap flat">
+    <table class="data compact">
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          {% for r in gender.rows %}<th scope="col" class="num">{{ r.label }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Persones</th>{% for r in gender.rows %}<td class="num">{{ r.persones }} ({{ r.pct_persones }})</td>{% endfor %}</tr>
+        <tr><th scope="row">Viatges</th>{% for r in gender.rows %}<td class="num">{{ r.viatges }}</td>{% endfor %}</tr>
+        <tr><th scope="row">Despesa total</th>{% for r in gender.rows %}<td class="num">{{ r.total }} ({{ r.pct_total }})</td>{% endfor %}</tr>
+        <tr><th scope="row">Despesa mitjana per persona</th>{% for r in gender.rows %}<td class="num">{{ r.per_persona }}</td>{% endfor %}</tr>
+        <tr><th scope="row">Despesa mediana per persona</th>{% for r in gender.rows %}<td class="num">{{ r.mediana }}</td>{% endfor %}</tr>
+        <tr><th scope="row">Despesa per viatge</th>{% for r in gender.rows %}<td class="num">{{ r.per_viatge }}</td>{% endfor %}</tr>
+        <tr><th scope="row">Despesa per dia</th>{% for r in gender.rows %}<td class="num">{{ r.per_dia }}</td>{% endfor %}</tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>En què gasten</h3>
+  {{ llegenda() }}
+  <div class="sex-stacks">
+    {% for r in gender.rows %}
+    <div><span class="sex-label">{{ r.label }}</span>{{ barra(r.shares) }}</div>
+    {% endfor %}
+  </div>
+  <p class="note small"><strong>El sexe és una estimació:</strong> el conjunt de dades no el publica. Es dedueix del
+    gènere gramatical del càrrec («consellera», «director»…){% if gender.n_sense %}; {{ gender.n_sense }}
+    {{ "persona" if gender.n_sense == 1 else "persones" }} sense classificar{% endif %}. Els imports són per registre
+    i, en els viatges del president i dels consellers, sovint inclouen la comitiva: la diferència entre sexes
+    reflecteix sobretot els càrrecs, no pas una diferència de comportament.
+    <a href="{{ base }}metodologia/">Més detalls</a>.</p>
+</section>
+{% endif %}
 
 <section class="card">
   <h2>En què gasta cada persona</h2>

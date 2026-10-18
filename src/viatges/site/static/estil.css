@@ -248,3 +248,6 @@ table.split-sum { max-width: 28rem; margin-top: 12px; }
   .overall { grid-template-columns: 1fr; gap: 4px; }
 }
 table.split td:first-child { min-width: 9rem; }
+.sex-stacks { display: grid; gap: 10px; margin: 8px 0 12px; }
+.sex-stacks > div { display: grid; grid-template-columns: 6rem 1fr; align-items: center; gap: 12px; }
+.sex-label { font-size: 0.9rem; }

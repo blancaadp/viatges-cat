@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "_repartiment.html" import llegenda, taula_destinacions with context %}
+{% block title %}Destinacions · Viatges dels alts càrrecs{% endblock %}
+{% block description %}Quines destinacions concentren més despesa i a quines s'ha viatjat més, segons les dades obertes de la Generalitat de Catalunya.{% endblock %}
+{% block content %}
+<h1>Destinacions</h1>
+<p class="lead">Quines destinacions suposen més despesa i a quines s'ha viatjat més vegades.</p>
+
+<section class="kpis" aria-label="Xifres">
+  {% for label, value in kpis %}
+  <div class="kpi"><div class="kpi-label">{{ label }}</div><div class="kpi-value">{{ value }}</div></div>
+  {% endfor %}
+</section>
+<p class="note small">No hi compten els viatges ni els trams a l'Estat espanyol. Quan un viatge té diverses
+  destinacions, la seva despesa es reparteix a parts iguals entre elles perquè un mateix import no es
+  compti dues vegades. <a href="{{ base }}metodologia/">Més detalls</a>.</p>
+
+{% for clau, titol, singular, article in (("paisos", "països", "País", "Els"), ("ciutats", "ciutats", "Ciutat", "Les")) %}
+{% set d = paisos if clau == "paisos" else ciutats %}
+<section class="card">
+  <h2>{{ article }} 15 {{ titol }} amb més despesa i més viatges</h2>
+  <div class="tablist" role="tablist" aria-label="Mesura ({{ titol }})">
+    <button type="button" role="tab" id="tab-{{ clau }}-despesa" aria-controls="panell-{{ clau }}-despesa" aria-selected="true">Més despesa</button>
+    <button type="button" role="tab" id="tab-{{ clau }}-viatges" aria-controls="panell-{{ clau }}-viatges" aria-selected="false" tabindex="-1">Més viatges</button>
+  </div>
+  <div role="tabpanel" id="panell-{{ clau }}-despesa" aria-labelledby="tab-{{ clau }}-despesa">
+    <p class="sub panel-title">Despesa total atribuïda a cada destinació.</p>
+    <ul class="bars wide">
+      {% for r in d.by_total %}
+      <li tabindex="0" data-tip="{{ r.tip }}">
+        {% if r.href %}<a class="bar-label" href="{{ r.href }}">{{ r.label }}</a>{% else %}<span class="bar-label">{{ r.label }}</span>{% endif %}
+        <span class="bar-track"><span class="bar-fill" style="--p: {{ '%.1f' % r.pct }}"></span><span class="bar-value">{{ r.display }}</span></span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div role="tabpanel" id="panell-{{ clau }}-viatges" aria-labelledby="tab-{{ clau }}-viatges">
+    <p class="sub panel-title">Nombre de viatges amb almenys una destinació aquí.</p>
+    <ul class="bars wide">
+      {% for r in d.by_n %}
+      <li tabindex="0" data-tip="{{ r.tip }}">
+        {% if r.href %}<a class="bar-label" href="{{ r.href }}">{{ r.label }}</a>{% else %}<span class="bar-label">{{ r.label }}</span>{% endif %}
+        <span class="bar-track"><span class="bar-fill" style="--p: {{ '%.1f' % r.pct }}"></span><span class="bar-value">{{ r.display }}</span></span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="card">
+  <h2>{{ titol | capitalize }}: detall i distribució per partida</h2>
+  <p class="sub">{% if clau == "ciutats" %}Les 40 ciutats amb més despesa de {{ d.n }}. {% endif %}Clica una capçalera per ordenar,
+    també per percentatge de cada partida (en què es gasta més a cada destinació).</p>
+  {{ llegenda() }}
+  {{ taula_destinacions(d.table, singular) }}
+</section>
+{% endfor %}
+{% endblock %}

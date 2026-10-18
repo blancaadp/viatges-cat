@@ -17,6 +17,7 @@
         <a href="{{ base }}"{% if page == "inici" %} aria-current="page"{% endif %}>Inici</a>
         <a href="{{ base }}viatges/"{% if page == "viatges" %} aria-current="page"{% endif %}>Viatges</a>
         <a href="{{ base }}departaments/"{% if page == "departaments" %} aria-current="page"{% endif %}>Departaments</a>
+        <a href="{{ base }}destinacions/"{% if page == "destinacions" %} aria-current="page"{% endif %}>Destinacions</a>
         <a href="{{ base }}persones/"{% if page == "persones" %} aria-current="page"{% endif %}>Persones</a>
         <a href="{{ base }}metodologia/"{% if page == "metodologia" %} aria-current="page"{% endif %}>Metodologia</a>
       </nav>
@@ -38,6 +39,7 @@
   </footer>
   <div class="tooltip" role="status" hidden></div>
   <script src="{{ base }}grafics.js?v={{ versio }}" defer></script>
+  <script src="{{ base }}ordena.js?v={{ versio }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>
