@@ -5,6 +5,13 @@
 # La publicació a GitHub Pages només s'executa si la variable del repositori
 # PUBLICAR_WEB val "true" (Settings → Secrets and variables → Actions → Variables).
 # GitHub Pages requereix que el repositori sigui públic o un pla de pagament.
+# Genera el web (ADR 0006) després de cada actualització setmanal, quan es canvia el codi a
+# main i també a mà, i el desplega a Vercel.
+#
+# El desplegament només s'executa si la variable del repositori PUBLICAR_WEB val "true"
+# (Settings → Secrets and variables → Actions → Variables) i hi ha els secrets VERCEL_TOKEN,
+# VERCEL_ORG_ID i VERCEL_PROJECT_ID. Sense això, el web queda com a artefacte "web" de
+# l'execució, descarregable des de la pestanya Actions.
 name: Web
 
 on:
@@ -20,13 +27,11 @@ on:
   workflow_dispatch: {}
 
 concurrency:
-  group: pages
+  group: web
   cancel-in-progress: true
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
   construir:
@@ -37,6 +42,8 @@ jobs:
     env:
       TURSO_URL: ${{ secrets.TURSO_URL }}
       TURSO_TOKEN: ${{ secrets.TURSO_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -48,19 +55,19 @@ jobs:
           uv run viatges build
 
       - name: Genera el web
-        run: uv run viatges web --base "/${{ github.event.repository.name }}/"
+        run: uv run viatges web
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: web
           path: site
 
-  publicar:
-    needs: construir
-    if: vars.PUBLICAR_WEB == 'true'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Desplega a Vercel
+        if: vars.PUBLICAR_WEB == 'true'
+        # Format "prebuilt": Vercel rep els fitxers ja generats i no intenta construir res
+        # (si no, detecta pyproject.toml i espera una aplicació Python).
+        run: |
+          mkdir -p .vercel/output
+          cp -R site .vercel/output/static
+          echo '{"version": 3}' > .vercel/output/config.json
+          npx --yes vercel@latest deploy --prebuilt --prod --yes --token "${{ secrets.VERCEL_TOKEN }}"

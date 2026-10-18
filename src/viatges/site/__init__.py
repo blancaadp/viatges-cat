@@ -1,7 +1,7 @@
 """Fase 4: genera el web estàtic a partir de `data/viatges.sqlite` (ADR 0006).
 
 El resultat és una carpeta (`site/`) amb HTML, CSS, JS i les dades en JSON i CSV, que es
-pot publicar tal qual a GitHub Pages. Els gràfics es dibuixen aquí en SVG, de manera que
+pot publicar tal qual a Vercel. Els gràfics es dibuixen aquí en SVG, de manera que
 es veuen encara que el navegador no executi JavaScript.
 """
 
@@ -575,7 +575,6 @@ def build_site(db_path: Path, manual_dir: Path, out_dir: Path, base: str = "/") 
     tmp = out_dir.with_name(out_dir.name + ".tmp")
     shutil.rmtree(tmp, ignore_errors=True)
     shutil.copytree(HERE / "static", tmp)
-    (tmp / ".nojekyll").touch()  # GitHub Pages: servir els fitxers tal qual
 
     def render(template: str, path: str, **ctx) -> None:
         target = tmp / path

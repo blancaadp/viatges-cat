@@ -1,4 +1,4 @@
-# 0006 · Web estàtic generat amb Python i publicat a GitHub Pages
+# 0006 · Web estàtic generat amb Python i desplegat a Vercel
 
 **Estat:** acceptada
 
@@ -23,16 +23,17 @@ publicació) només existeix a la nostra base de dades, no a Socrata.
 5. **Xifres:** compten tots els viatges excepte els exclosos per durada (p99, ADR 0004) i els
    duplicats. Ho explica la pàgina de metodologia.
 6. **Publicació:** el workflow `web.yml` reconstrueix la base de dades des de Turso,
-   genera el web i el publica a GitHub Pages després de cada actualització setmanal i de
-   cada canvi al codi.
+   genera el web i el desplega a Vercel (CLI en format «prebuilt», amb la carpeta `site/`) després
+   de cada actualització setmanal i de cada canvi al codi. El web es construeix a GitHub
+   Actions i no a Vercel, perquè necessita les dades de Turso.
 
 ## Conseqüències
 
 - Primera versió: inici, explorador, fitxa de viatge i metodologia. Les pàgines de
   persones, destinacions i retard de publicació es poden afegir sense canviar
   l'arquitectura.
-- GitHub Pages en un repositori privat requereix un pla de pagament de GitHub. Amb el pla
-  gratuït, el repositori ha de ser públic. Mentre és privat, el web es genera igualment i
-  queda com a artefacte de cada execució; la publicació s'activa amb la variable
-  `PUBLICAR_WEB`.
+- Vercel serveix el web des de l'arrel (`--base "/"`), de manera que no cal cap camí base.
+  El desplegament s'activa amb la variable `PUBLICAR_WEB` i els secrets `VERCEL_TOKEN`,
+  `VERCEL_ORG_ID` i `VERCEL_PROJECT_ID`; sense això, el web queda com a artefacte de cada
+  execució. Funciona amb el repositori privat.
 - Si en el futur volem consultes en directe o una API, Turso ja té les dades.

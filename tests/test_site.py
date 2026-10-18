@@ -51,7 +51,6 @@ def test_build_site_genera_totes_les_pagines(site):
     assert (site / "metodologia" / "index.html").exists()
     assert (site / "persones" / "index.html").exists()
     assert (site / "persona" / "persona-b" / "index.html").exists()
-    assert (site / ".nojekyll").exists()
     assert len(list((site / "viatge").iterdir())) == len(ROWS)
     index = (site / "index.html").read_text(encoding="utf-8")
     assert 'href="/viatges-cat/estil.css?v=' in index  # amb versió per a la memòria cau

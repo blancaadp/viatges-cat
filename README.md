@@ -95,10 +95,15 @@ Configuració inicial (un sol cop):
 
 El workflow [`web.yml`](.github/workflows/web.yml) genera el web després de cada
 actualització setmanal i de cada canvi al codi, i el deixa com a artefacte descarregable de
-l'execució. Per publicar-lo a GitHub Pages (cal que el repositori sigui públic):
+l'execució. Per desplegar-lo a Vercel:
 
-1. *Settings → Pages → Build and deployment → Source: GitHub Actions*.
-2. *Settings → Secrets and variables → Actions → Variables*: crea `PUBLICAR_WEB` = `true`.
+1. A Vercel, crea un projecte nou amb el framework «Other». No hi connectis el repositori
+   de Git: el web es construeix a GitHub Actions perquè necessita les dades de Turso.
+2. Des de la carpeta del projecte, executa `npx vercel link` i copia `orgId` i `projectId`
+   de `.vercel/project.json`.
+3. Crea un token a *Vercel → Account Settings → Tokens*.
+4. A GitHub, *Settings → Secrets and variables → Actions*: crea els secrets `VERCEL_TOKEN`,
+   `VERCEL_ORG_ID` i `VERCEL_PROJECT_ID`, i la variable `PUBLICAR_WEB` = `true`.
 
 ## Font de les dades
 
