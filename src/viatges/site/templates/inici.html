@@ -50,11 +50,12 @@
     <ul class="bars">
       {% for r in ambit_rows %}
       <li tabindex="0" data-tip="{{ r.tip }}">
-        <span class="bar-label">{{ r.label }}</span>
+        <a class="bar-label" href="{{ r.href }}">{{ r.label }}</a>
         <span class="bar-track"><span class="bar-fill" style="--p: {{ '%.1f' % r.pct }}"></span><span class="bar-value">{{ r.display }}</span></span>
       </li>
       {% endfor %}
     </ul>
+    <p class="more"><a href="{{ base }}departaments/">En què gasta cada departament →</a></p>
   </section>
   <section class="card">
     <h2>Països més visitats</h2>

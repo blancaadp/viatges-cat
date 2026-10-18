@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% from "_repartiment.html" import llegenda, barra, taula with context %}
+{% block title %}{{ ambit }} · Viatges dels alts càrrecs{% endblock %}
+{% block description %}Despesa en viatges a l'estranger de l'àmbit {{ ambit }} de la Generalitat de Catalunya, per partida.{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="{{ base }}departaments/">← Tots els departaments</a></p>
+<h1>{{ ambit }}</h1>
+{% if noms | length > 1 %}
+<p class="muted">Inclou els departaments: {{ noms | join(" · ") }}.</p>
+{% endif %}
+
+<section class="kpis" aria-label="Xifres">
+  {% for label, value in kpis %}
+  <div class="kpi"><div class="kpi-label">{{ label }}</div><div class="kpi-value">{{ value }}</div></div>
+  {% endfor %}
+</section>
+{% if n_no_compten %}
+<p class="note">{{ n_no_compten }} {{ "registre no compta" if n_no_compten == 1 else "registres no compten" }} a
+  les xifres perquè {{ "és un duplicat o té" if n_no_compten == 1 else "són duplicats o tenen" }} una durada anòmala.</p>
+{% endif %}
+
+{% if shares %}
+<section class="card">
+  <h2>En què gasta</h2>
+  <p class="sub">La partida amb més despesa és <strong>{{ shares.top.label | lower }}</strong> ({{ shares.top.pct_text }}).</p>
+  {{ llegenda() }}
+  {{ barra(shares) }}
+  <table class="data compact split-sum">
+    <tbody>
+      {% for p in shares.parts %}
+      <tr><th scope="row"><span class="swatch c{{ loop.index0 }}"></span>{{ p.label }}</th><td class="num">{{ p.eur }}</td><td class="num">{{ p.pct_text }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{% if year_chart %}
+<section class="card">
+  <h2>Despesa per any</h2>
+  {{ year_chart | safe }}
+</section>
+{% endif %}
+
+{% if people_rows %}
+<section class="card">
+  <h2>En què gasta cada persona</h2>
+  <p class="sub">Les {{ people_rows | length }} persones amb més despesa{% if n_persones > people_rows | length %} (de {{ n_persones }}){% endif %}, només amb els viatges fets en aquest àmbit.</p>
+  {{ llegenda() }}
+  {{ taula(people_rows, "Persona") }}
+</section>
+{% endif %}
+{% endblock %}

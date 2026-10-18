@@ -10,6 +10,10 @@
   --axis: #c3c2b7;
   --border: rgba(11, 11, 11, 0.1);
   --series-1: #2a78d6;
+  --cat-0: #2a78d6;
+  --cat-1: #d9822b;
+  --cat-2: #2a9d6f;
+  --cat-3: #8a63c4;
   --link: #1c5cab;
   --accent-wash: #cde2fb;
   --warn-bg: #fff4dc;
@@ -29,6 +33,10 @@
     --axis: #383835;
     --border: rgba(255, 255, 255, 0.1);
     --series-1: #3987e5;
+    --cat-0: #3987e5;
+    --cat-1: #eb9a45;
+    --cat-2: #3db98a;
+    --cat-3: #a583d9;
     --link: #86b6ef;
     --accent-wash: #184f95;
     --warn-bg: #3a2c08;
@@ -46,6 +54,10 @@
   --axis: #383835;
   --border: rgba(255, 255, 255, 0.1);
   --series-1: #3987e5;
+  --cat-0: #3987e5;
+  --cat-1: #eb9a45;
+  --cat-2: #3db98a;
+  --cat-3: #a583d9;
   --link: #86b6ef;
   --accent-wash: #184f95;
   --warn-bg: #3a2c08;
@@ -217,3 +229,22 @@ code { font-size: 0.9em; }
   .trips td:nth-child(2), .trips td:nth-child(3) { grid-column: 1 / -1; }
   table.data.trips td:nth-child(4) { display: none; }
 }
+
+/* Distribució de la despesa per partida */
+.legend { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0 12px; padding: 0; font-size: 0.88rem; }
+.swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.swatch.c0, .seg.c0 { background: var(--cat-0); }
+.swatch.c1, .seg.c1 { background: var(--cat-1); }
+.swatch.c2, .seg.c2 { background: var(--cat-2); }
+.swatch.c3, .seg.c3 { background: var(--cat-3); }
+.stack { display: flex; height: 16px; min-width: 140px; gap: 2px; border-radius: 4px; overflow: hidden; }
+.seg { flex: var(--p) 1 0; min-width: 2px; }
+.seg:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.stack-cell { min-width: 160px; width: 30%; }
+.overall { display: grid; grid-template-columns: 10rem 1fr; align-items: center; gap: 12px; margin: 0 0 16px; }
+table.split-sum { max-width: 28rem; margin-top: 12px; }
+@media (max-width: 760px) {
+  .hide-sm { display: none; }
+  .overall { grid-template-columns: 1fr; gap: 4px; }
+}
+table.split td:first-child { min-width: 9rem; }

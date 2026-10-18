@@ -58,6 +58,10 @@ def fmt_compact_eur(value: float) -> str:
     return f"{value:.0f} €"
 
 
+def fmt_pct(value: float) -> str:
+    return f"{value:.1f}".replace(".", ",") + " %"
+
+
 def fmt_date(value: str | None, long: bool = False) -> str:
     if value is None or pd.isna(value) or not str(value).strip():
         return "—"
@@ -164,6 +168,46 @@ def bar_rows(rows: list[BarRow]) -> list[dict]:
     return [{**r.__dict__, "pct": r.value / maximum * 100} for r in rows]
 
 
+# Partides de despesa, en l'ordre en què es mostren (la columna de la base de dades i l'etiqueta)
+CATEGORIES = [
+    ("dietes_eur", "Dietes i manutenció"),
+    ("allotjament_eur", "Allotjament"),
+    ("transport_eur", "Transport"),
+    ("altres_despeses_eur", "Altres despeses"),
+]
+
+
+def category_shares(frame: pd.DataFrame) -> dict | None:
+    """Distribució percentual de la despesa per partida.
+
+    El percentatge es calcula sobre la suma de les quatre partides, no sobre `total_eur`,
+    perquè així les quatre parts sumen sempre el 100 %. Retorna None si no hi ha cap import.
+    """
+    sums = frame[[col for col, _ in CATEGORIES]].fillna(0).sum()
+    total = float(sums.sum())
+    if total <= 0:
+        return None
+    parts = []
+    for (_col, label), value in zip(CATEGORIES, sums, strict=True):
+        pct = float(value) / total * 100
+        parts.append(
+            {
+                "label": label,
+                "value": float(value),
+                "eur": fmt_eur(value),
+                "pct": pct,
+                "pct_text": fmt_pct(pct),
+                "tip": f"{label}: {fmt_eur(value)} ({fmt_pct(pct)})",
+            }
+        )
+    top = max(parts, key=lambda p: p["value"])
+    return {"total": total, "parts": parts, "top": top}
+
+
+def slug(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", _key(text)).strip("-")
+
+
 # ---------------------------------------------------------------------------
 # Dades
 # ---------------------------------------------------------------------------
@@ -227,7 +271,8 @@ def home_context(data: SiteData, base: str) -> dict:
     )
     ambit_rows = [
         BarRow(a, float(r["sum"]), fmt_compact_eur(r["sum"]),
-               f"{a}: {fmt_eur(r['sum'])} en {fmt_int(r['size'])} viatges")
+               f"{a}: {fmt_eur(r['sum'])} en {fmt_int(r['size'])} viatges",
+               f"{base}departament/{slug(a)}/")
         for a, r in ambits.head(10).iterrows()
     ]  # fmt: skip
     names = country_names(data.trams)
@@ -326,13 +371,35 @@ def people_context(data: SiteData, base: str) -> dict:
         )
 
     daily = table[(table["viatges"] >= MIN_TRIPS_DAILY) & table["diaria"].notna()]
+    counted = analysis_set(data.viatges)
     return {
+        "category_rows": category_rows(counted, table.head(15).index, table, base),
         "total_rows": rows("total", table),
         "daily_rows": rows("diaria", daily),
         "min_trips": MIN_TRIPS_DAILY,
         "n_persones": data.viatges["persona_id"].nunique(),
         "people": people_directory(data, table),
     }
+
+
+def category_rows(counted: pd.DataFrame, person_ids, table: pd.DataFrame, base: str) -> list[dict]:
+    """Una fila per persona amb la distribució de la despesa per partida."""
+    rows = []
+    for pid in person_ids:
+        trips = counted[counted["persona_id"] == pid]
+        shares = category_shares(trips)
+        if shares is None:
+            continue
+        rows.append(
+            {
+                "label": table.loc[pid, "persona"],
+                "href": f"{base}persona/{pid}/",
+                "n": fmt_int(len(trips)),
+                "total": fmt_eur(shares["total"]),
+                "shares": shares,
+            }
+        )
+    return rows
 
 
 def people_directory(data: SiteData, table: pd.DataFrame) -> list[dict]:
@@ -417,6 +484,7 @@ def person_context(pid: str, data: SiteData, table: pd.DataFrame, base: str) -> 
             "carrec": last["carrec"],
         },
         "year_chart": year_chart,
+        "shares": category_shares(counted),
         "variants": sorted(set(trips["nom"].map(lambda n: " ".join(str(n).split())))),
         "roles": [
             (r.carrec, fmt_date(r.des_de), fmt_date(r.fins), r.n) for r in roles.itertuples()
@@ -452,6 +520,71 @@ def person_context(pid: str, data: SiteData, table: pd.DataFrame, base: str) -> 
                 ),
             }
             for t in trips.itertuples()
+        ],
+        "n_no_compten": len(trips) - len(counted),
+    }
+
+
+def departments_context(data: SiteData, base: str) -> dict:
+    v = analysis_set(data.viatges)
+    rows = []
+    for ambit, trips in v.groupby("ambit"):
+        shares = category_shares(trips)
+        if shares is None:
+            continue
+        rows.append(
+            {
+                "label": ambit,
+                "href": f"{base}departament/{slug(ambit)}/",
+                "n": fmt_int(len(trips)),
+                "total": fmt_eur(shares["total"]),
+                "shares": shares,
+                "sort": shares["total"],
+            }
+        )
+    rows.sort(key=lambda r: r["sort"], reverse=True)
+    overall = category_shares(v)
+    return {"rows": rows, "overall": overall}
+
+
+def department_context(ambit: str, data: SiteData, base: str) -> dict:
+    trips = data.viatges[data.viatges["ambit"] == ambit]
+    counted = analysis_set(trips)
+    names = sorted(trips["departament"].dropna().unique())
+    by_year = counted.assign(any=counted["data_inici_iso"].str[:4]).groupby("any")
+    year_totals = by_year["total_eur"].sum()
+    year_counts = by_year.size()
+    year_chart = (
+        column_chart(
+            [
+                {
+                    "label": y,
+                    "value": float(t),
+                    "tip": f"{y}: {fmt_eur(t)} · {fmt_int(year_counts[y])} viatges",
+                }
+                for y, t in year_totals.items()
+            ],
+            f"Despesa per any: {ambit}",
+        )
+        if len(year_totals) >= 2
+        else None
+    )
+    totals = counted.groupby("persona_id")["total_eur"].sum().sort_values(ascending=False)
+    people = counted.groupby("persona_id")["persona"].last().to_frame("persona")
+    people_rows = category_rows(counted, totals.head(15).index, people, base)
+    shares = category_shares(counted)
+    return {
+        "ambit": ambit,
+        "noms": names,
+        "shares": shares,
+        "year_chart": year_chart,
+        "people_rows": people_rows,
+        "n_persones": counted["persona_id"].nunique(),
+        "kpis": [
+            ("Despesa total", fmt_eur(counted["total_eur"].sum())),
+            ("Viatges", fmt_int(len(counted))),
+            ("Alts càrrecs", fmt_int(counted["persona_id"].nunique())),
+            ("Dies de viatge", fmt_int(counted["durada_dies"].sum())),
         ],
         "n_no_compten": len(trips) - len(counted),
     }
@@ -558,6 +691,7 @@ def build_site(db_path: Path, manual_dir: Path, out_dir: Path, base: str = "/") 
     env.filters.update(
         eur=fmt_eur, data=fmt_date, enter=fmt_int, text=text_or_none, enllacos=linkify
     )
+    env.globals["categories"] = list(enumerate(label for _, label in CATEGORIES))
     updated = data.instantanies["downloaded_at"].iloc[-1]
     # Versió dels fitxers estàtics: canvia quan en canvia el contingut i evita que el
     # navegador continuï fent servir un CSS o JS antic de la memòria cau.
@@ -590,6 +724,11 @@ def build_site(db_path: Path, manual_dir: Path, out_dir: Path, base: str = "/") 
            if data.viatges["exclos_analisi"].any() else None)  # fmt: skip
     render("404.html", "404.html", page=None)
     render("persones.html", "persones/index.html", page="persones", **people_context(data, base))
+    render("departaments.html", "departaments/index.html", page="departaments",
+           **departments_context(data, base))  # fmt: skip
+    for ambit in data.viatges["ambit"].dropna().unique():
+        render("departament.html", f"departament/{slug(ambit)}/index.html", page="departaments",
+               **department_context(ambit, data, base))  # fmt: skip
     table = people_table(data)
     for pid in data.viatges["persona_id"].unique():
         render("persona.html", f"persona/{pid}/index.html", page="persones",

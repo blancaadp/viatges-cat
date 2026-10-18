@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_repartiment.html" import llegenda, barra with context %}
 {% block title %}{{ persona }} · Viatges dels alts càrrecs{% endblock %}
 {% block description %}Viatges a l'estranger de {{ persona }} publicats per la Generalitat de Catalunya.{% endblock %}
 {% block content %}
@@ -20,6 +21,23 @@
 <p class="note">{{ n_no_compten }} {{ "registre no compta" if n_no_compten == 1 else "registres no compten" }} a
   les xifres perquè {{ "és un duplicat o té" if n_no_compten == 1 else "són duplicats o tenen" }} una durada anòmala.
   <a href="{{ base }}metodologia/">Per què?</a></p>
+{% endif %}
+
+{% if shares %}
+<section class="card">
+  <h2>En què gasta</h2>
+  <p class="sub">La partida amb més despesa és <strong>{{ shares.top.label | lower }}</strong> ({{ shares.top.pct_text }}).
+    Només els viatges que compten a les xifres.</p>
+  {{ llegenda() }}
+  {{ barra(shares) }}
+  <table class="data compact split-sum">
+    <tbody>
+      {% for p in shares.parts %}
+      <tr><th scope="row"><span class="swatch c{{ loop.index0 }}"></span>{{ p.label }}</th><td class="num">{{ p.eur }}</td><td class="num">{{ p.pct_text }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
 {% endif %}
 
 {% if year_chart %}

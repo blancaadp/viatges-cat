@@ -1,9 +1,18 @@
 import json
 
+import pandas as pd
 import pytest
 from conftest import ROWS, write_snapshot
 
-from viatges.site import build_site, column_chart, fmt_compact_eur, fmt_date, fmt_eur, linkify
+from viatges.site import (
+    build_site,
+    category_shares,
+    column_chart,
+    fmt_compact_eur,
+    fmt_date,
+    fmt_eur,
+    linkify,
+)
 from viatges.store import build_database
 
 
@@ -84,3 +93,33 @@ def test_cercador_de_persones_inclou_variants_i_carrecs(site):
     assert 'data-cerca="persona b' in page  # nom en minúscules i sense accents
     home = (site / "index.html").read_text(encoding="utf-8")
     assert 'action="/viatges-cat/persones/"' in home
+
+
+def test_category_shares_sumen_100():
+    frame = pd.DataFrame(
+        {
+            "dietes_eur": [100.0, None],
+            "allotjament_eur": [300.0, 100.0],
+            "transport_eur": [500.0, 0.0],
+            "altres_despeses_eur": [0.0, None],
+        }
+    )
+    shares = category_shares(frame)
+    assert shares["top"]["label"] == "Transport"
+    assert [round(p["pct"]) for p in shares["parts"]] == [10, 40, 50, 0]
+    assert sum(p["pct"] for p in shares["parts"]) == pytest.approx(100)
+    assert category_shares(frame.iloc[0:0]) is None
+
+
+def test_pagines_de_departaments_i_distribucio_per_persona(site):
+    index = (site / "departaments" / "index.html").read_text(encoding="utf-8")
+    assert "Distribució de la despesa per partida" in index
+    departments = [p for p in (site / "departament").iterdir() if p.is_dir()]
+    assert departments
+    page = (departments[0] / "index.html").read_text(encoding="utf-8")
+    assert "En què gasta" in page
+    persona = (site / "persona" / "persona-b" / "index.html").read_text(encoding="utf-8")
+    assert "En què gasta" in persona
+    assert "En què gasta cada persona" in (site / "persones" / "index.html").read_text(
+        encoding="utf-8"
+    )

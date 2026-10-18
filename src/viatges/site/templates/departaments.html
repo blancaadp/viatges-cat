@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_repartiment.html" import llegenda, barra, taula with context %}
+{% block title %}Departaments · Viatges dels alts càrrecs{% endblock %}
+{% block content %}
+<h1>Departaments</h1>
+<p class="lead">En què gasta cada departament: dietes i manutenció, allotjament, transport o altres despeses.
+  Els departaments canvien de nom a cada legislatura; aquí s'agrupen per àmbit.</p>
+
+<section class="card">
+  <h2>Distribució de la despesa per partida</h2>
+  <p class="sub">Percentatge de la despesa de cada àmbit en cada partida, ordenats de més a menys despesa total.
+    Les quatre partides sumen el 100 %.</p>
+  {{ llegenda() }}
+  <p class="overall"><strong>Tots els àmbits:</strong> {{ barra(overall) }}</p>
+  {{ taula(rows, "Àmbit") }}
+  <p class="note small">Només compten els viatges que entren a les xifres (sense duplicats ni durades anòmales).
+    <a href="{{ base }}metodologia/">Més detalls</a>.</p>
+</section>
+{% endblock %}

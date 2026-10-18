@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_repartiment.html" import llegenda, taula with context %}
 {% block title %}Persones · Viatges dels alts càrrecs{% endblock %}
 {% block content %}
 <h1>Persones</h1>
@@ -73,6 +74,13 @@
   <p class="note small">L'import és per registre: en els viatges del president i dels consellers sovint inclou la
     despesa de tota la comitiva, i per això la seva despesa diària és més alta.
     <a href="{{ base }}metodologia/">Més detalls</a>.</p>
+</section>
+
+<section class="card">
+  <h2>En què gasta cada persona</h2>
+  <p class="sub">Distribució percentual de la despesa de les 15 persones amb més despesa total, per partida.</p>
+  {{ llegenda() }}
+  {{ taula(category_rows, "Persona") }}
 </section>
 {% endblock %}
 {% block scripts %}<script src="{{ base }}persones.js?v={{ versio }}" defer></script>{% endblock %}

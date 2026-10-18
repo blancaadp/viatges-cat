@@ -1,0 +1,40 @@
+{# Distribució percentual de la despesa per partida: llegenda, barra al 100 % i taula. #}
+{% macro llegenda() %}
+<ul class="legend" aria-label="Partides">
+  {% for i, label in categories %}<li><span class="swatch c{{ i }}"></span>{{ label }}</li>{% endfor %}
+</ul>
+{% endmacro %}
+
+{% macro barra(shares) %}
+<span class="stack" role="img" aria-label="{% for p in shares.parts %}{{ p.label }} {{ p.pct_text }}{{ '; ' if not loop.last }}{% endfor %}">
+  {% for p in shares.parts %}{% if p.pct > 0 %}<span class="seg c{{ loop.index0 }}" style="--p: {{ '%.2f' % p.pct }}" tabindex="0" data-tip="{{ p.tip }}"></span>{% endif %}{% endfor %}
+</span>
+{% endmacro %}
+
+{# rows: label, href, n, total, shares #}
+{% macro taula(rows, primera) %}
+<div class="table-wrap flat">
+  <table class="data split">
+    <thead>
+      <tr>
+        <th scope="col">{{ primera }}</th>
+        <th scope="col" class="num">Viatges</th>
+        <th scope="col" class="num">Total</th>
+        <th scope="col">Distribució</th>
+        {% for i, label in categories %}<th scope="col" class="num hide-sm">{{ label }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td><a href="{{ r.href }}">{{ r.label }}</a></td>
+        <td class="num">{{ r.n }}</td>
+        <td class="num">{{ r.total }}</td>
+        <td class="stack-cell">{{ barra(r.shares) }}</td>
+        {% for p in r.shares.parts %}<td class="num hide-sm">{{ p.pct_text }}</td>{% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endmacro %}
