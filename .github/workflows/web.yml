@@ -70,4 +70,4 @@ jobs:
           mkdir -p .vercel/output
           cp -R site .vercel/output/static
           echo '{"version": 3}' > .vercel/output/config.json
-          npx --yes vercel@latest deploy --prebuilt --prod --yes --token "${{ secrets.VERCEL_TOKEN }}"
+          npx --yes vercel@latest deploy --prebuilt --archive=tgz --prod --yes --token "${{ secrets.VERCEL_TOKEN }}"
