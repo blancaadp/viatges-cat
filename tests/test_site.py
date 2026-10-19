@@ -156,3 +156,9 @@ def test_pagina_de_destinacions_i_sense_sexe_si_no_es_pot_estimar(site):
     persones = (site / "persones" / "index.html").read_text(encoding="utf-8")
     # Sense càrrecs amb gènere no es pot estimar el sexe: la secció no es mostra
     assert 'id="sexe"' not in persones
+
+
+def test_pagina_de_l_autora(site):
+    page = (site / "autora" / "index.html").read_text(encoding="utf-8")
+    assert "Autora" in page
+    assert "github.com/blancaadp" in page

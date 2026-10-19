@@ -30,6 +30,11 @@ log = logging.getLogger(__name__)
 HERE = Path(__file__).parent
 DATASET_URL = "https://analisi.transparenciacatalunya.cat/d/5kte-hque"
 REPO_URL = "https://github.com/blancaadp/viatges-cat"
+# Pàgina «Autora»: posa aquí el nom i els enllaços que vulguis mostrar (text, URL).
+AUTORA = {
+    "nom": "Blanca Domènech Pellejà",
+    "enllacos": [("GitHub", "https://github.com/blancaadp")],
+}
 MONTHS = ["gener", "febrer", "març", "abril", "maig", "juny", "juliol", "agost",
           "setembre", "octubre", "novembre", "desembre"]  # fmt: skip
 
@@ -108,7 +113,7 @@ def column_chart(items: list[dict], title: str) -> str:
         return top + plot_h - v / y_max * plot_h
 
     parts = [
-        f'<svg class="chart" viewBox="0 0 {width} {height}" role="img" '
+        f'<svg class="chart" viewBox="0 0 {width} {height}" role="group" '
         f'aria-label="{title}" preserveAspectRatio="xMidYMid meet">'
     ]
     tick = 0.0
@@ -146,7 +151,7 @@ def column_chart(items: list[dict], title: str) -> str:
         # Zona de hover: tota la franja, més gran que la columna
         parts.append(
             f'<rect class="hit" x="{left + band * idx:.1f}" y="{top}" width="{band:.1f}" '
-            f'height="{plot_h}" tabindex="0" data-tip="{item["tip"]}" '
+            f'height="{plot_h}" tabindex="0" role="img" data-tip="{item["tip"]}" '
             f'aria-label="{item["tip"]}"/>'
         )
     parts.append("</svg>")
@@ -907,6 +912,7 @@ def build_site(db_path: Path, manual_dir: Path, out_dir: Path, base: str = "/") 
            n_exclosos=int(data.viatges["exclos_analisi"].sum()),
            llindar=int(data.viatges.loc[data.viatges["exclos_analisi"], "durada_dies"].min() - 1)
            if data.viatges["exclos_analisi"].any() else None)  # fmt: skip
+    render("autora.html", "autora/index.html", page="autora", autora=AUTORA)
     render("404.html", "404.html", page=None)
     render("persones.html", "persones/index.html", page="persones", **people_context(data, base))
     render("departaments.html", "departaments/index.html", page="departaments",

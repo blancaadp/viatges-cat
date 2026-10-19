@@ -21,7 +21,7 @@
         <tr>
           <th scope="col"><button type="button" data-sort="nom">Persona</button></th>
           <th scope="col" class="num"><button type="button" data-sort="viatges">Viatges</button></th>
-          <th scope="col" class="num"><button type="button" data-sort="total" aria-sort="descending">Total</button></th>
+          <th scope="col" class="num" aria-sort="descending"><button type="button" data-sort="total">Total</button></th>
           <th scope="col" class="num"><button type="button" data-sort="diaria">Per dia</button></th>
           <th scope="col" class="num"><button type="button" data-sort="darrer">Darrer viatge</button></th>
         </tr>
@@ -90,7 +90,7 @@
     <table class="data compact">
       <thead>
         <tr>
-          <th scope="col"></th>
+          <th scope="col"><span class="sr-only">Mesura</span></th>
           {% for r in gender.rows %}<th scope="col" class="num">{{ r.label }}</th>{% endfor %}
         </tr>
       </thead>

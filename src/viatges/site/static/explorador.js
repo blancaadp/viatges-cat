@@ -101,7 +101,7 @@
     prev.disabled = page === 0;
     next.disabled = page >= pages - 1;
     for (const b of document.querySelectorAll("th button")) {
-      b.setAttribute("aria-sort", b.dataset.sort === sortKey ? (sortDir > 0 ? "ascending" : "descending") : "none");
+      b.closest("th").setAttribute("aria-sort", b.dataset.sort === sortKey ? (sortDir > 0 ? "ascending" : "descending") : "none");
     }
   };
 

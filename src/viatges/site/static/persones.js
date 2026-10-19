@@ -34,7 +34,7 @@
       resum.textContent = showAll ? `${rows.length} persones.` : `${rows.length} persones. Mostrant les ${INITIAL} primeres.`;
     }
     for (const b of document.querySelectorAll("#cercador th button")) {
-      b.setAttribute("aria-sort", b.dataset.sort === sortKey ? (sortDir > 0 ? "ascending" : "descending") : "none");
+      b.closest("th").setAttribute("aria-sort", b.dataset.sort === sortKey ? (sortDir > 0 ? "ascending" : "descending") : "none");
     }
   };
 

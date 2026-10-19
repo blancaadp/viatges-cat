@@ -7,13 +7,13 @@
 
 {% macro barra(shares) %}
 <span class="stack" role="img" aria-label="{% for p in shares.parts %}{{ p.label }} {{ p.pct_text }}{{ '; ' if not loop.last }}{% endfor %}">
-  {% for p in shares.parts %}{% if p.pct > 0 %}<span class="seg c{{ loop.index0 }}" style="--p: {{ '%.2f' % p.pct }}" tabindex="0" data-tip="{{ p.tip }}"></span>{% endif %}{% endfor %}
+  {% for p in shares.parts %}{% if p.pct > 0 %}<span class="seg c{{ loop.index0 }}" style="--p: {{ '%.2f' % p.pct }}" data-tip="{{ p.tip }}"></span>{% endif %}{% endfor %}
 </span>
 {% endmacro %}
 
 {# Capçalera ordenable: col = índex de la columna; tipus = "text" o "num" #}
 {% macro cap(text, col, tipus="num", ordre=none, classe="num") %}
-<th scope="col" class="{{ classe }}"><button data-col="{{ col }}" data-type="{{ tipus }}"{% if ordre %} aria-sort="{{ ordre }}"{% endif %}>{{ text }}</button></th>
+<th scope="col" class="{{ classe }}"{% if ordre %} aria-sort="{{ ordre }}"{% endif %}><button data-col="{{ col }}" data-type="{{ tipus }}">{{ text }}</button></th>
 {% endmacro %}
 
 {# rows: label, href, n, n_val, total, shares. Ordenable per qualsevol columna, també per partida. #}

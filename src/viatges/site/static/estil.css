@@ -10,10 +10,12 @@
   --axis: #c3c2b7;
   --border: rgba(11, 11, 11, 0.1);
   --series-1: #2a78d6;
-  --cat-0: #2a78d6;
-  --cat-1: #d9822b;
-  --cat-2: #2a9d6f;
-  --cat-3: #8a63c4;
+  --cat-0: #0072b2;
+  --cat-1: #c85a00;
+  --cat-2: #2f2f2f;
+  --cat-3: #cc79a7;
+  --pat: rgba(255, 255, 255, 0.6);
+  --button-bg: #1c5cab;
   --link: #1c5cab;
   --accent-wash: #cde2fb;
   --warn-bg: #fff4dc;
@@ -33,10 +35,12 @@
     --axis: #383835;
     --border: rgba(255, 255, 255, 0.1);
     --series-1: #3987e5;
-    --cat-0: #3987e5;
-    --cat-1: #eb9a45;
-    --cat-2: #3db98a;
-    --cat-3: #a583d9;
+    --cat-0: #56a5e8;
+    --cat-1: #f0883a;
+    --cat-2: #e6e6e6;
+    --cat-3: #d98bb8;
+    --pat: rgba(0, 0, 0, 0.5);
+    --button-bg: #2b6cc4;
     --link: #86b6ef;
     --accent-wash: #184f95;
     --warn-bg: #3a2c08;
@@ -54,10 +58,12 @@
   --axis: #383835;
   --border: rgba(255, 255, 255, 0.1);
   --series-1: #3987e5;
-  --cat-0: #3987e5;
-  --cat-1: #eb9a45;
-  --cat-2: #3db98a;
-  --cat-3: #a583d9;
+  --cat-0: #56a5e8;
+  --cat-1: #f0883a;
+  --cat-2: #e6e6e6;
+  --cat-3: #d98bb8;
+  --pat: rgba(0, 0, 0, 0.5);
+  --button-bg: #2b6cc4;
   --link: #86b6ef;
   --accent-wash: #184f95;
   --warn-bg: #3a2c08;
@@ -170,8 +176,8 @@ table.compact th { font-weight: 400; color: var(--ink-2); }
 .trips .meta { display: block; color: var(--muted); font-size: 0.82rem; }
 th button { all: unset; cursor: pointer; }
 th button::after { content: " ↕"; color: var(--muted); }
-th button[aria-sort="ascending"]::after { content: " ↑"; color: var(--ink); }
-th button[aria-sort="descending"]::after { content: " ↓"; color: var(--ink); }
+th[aria-sort="ascending"] button::after { content: " ↑"; color: var(--ink); }
+th[aria-sort="descending"] button::after { content: " ↓"; color: var(--ink); }
 .badge { display: inline-block; font-size: 0.75rem; padding: 1px 7px; border-radius: 999px; background: var(--warn-bg); color: var(--warn-ink); margin: 2px 4px 0 0; white-space: nowrap; }
 
 /* Filtres */
@@ -186,7 +192,7 @@ th button[aria-sort="descending"]::after { content: " ↓"; color: var(--ink); }
 .pager { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 16px; }
 
 /* Botons */
-.button { display: inline-block; font: inherit; font-weight: 600; background: var(--series-1); color: #fff; border: 0; border-radius: 8px; padding: 10px 16px; text-decoration: none; cursor: pointer; }
+.button { display: inline-block; font: inherit; font-weight: 600; background: var(--button-bg); color: #fff; border: 0; border-radius: 8px; padding: 10px 16px; text-decoration: none; cursor: pointer; }
 .button.secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--axis); font-weight: 500; padding: 8px 14px; }
 .button:disabled { opacity: 0.45; cursor: default; }
 .cta { text-align: center; margin: 32px 0; }
@@ -239,7 +245,11 @@ code { font-size: 0.9em; }
 .swatch.c3, .seg.c3 { background: var(--cat-3); }
 .stack { display: flex; height: 16px; min-width: 140px; gap: 2px; border-radius: 4px; overflow: hidden; }
 .seg { flex: var(--p) 1 0; min-width: 2px; }
-.seg:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+/* Textures: la partida no depèn només del color (blau llis, ratlles, punts, quadrícula) */
+.swatch.c1, .seg.c1 { background-image: repeating-linear-gradient(45deg, var(--pat) 0 2px, transparent 2px 6px); }
+.swatch.c2, .seg.c2 { background-image: radial-gradient(circle, var(--pat) 1.2px, transparent 1.6px); background-size: 6px 6px; }
+.swatch.c3, .seg.c3 { background-image: repeating-linear-gradient(90deg, var(--pat) 0 2px, transparent 2px 5px), repeating-linear-gradient(0deg, var(--pat) 0 2px, transparent 2px 5px); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .stack-cell { min-width: 160px; width: 30%; }
 .overall { display: grid; grid-template-columns: 10rem 1fr; align-items: center; gap: 12px; margin: 0 0 16px; }
 table.split-sum { max-width: 28rem; margin-top: 12px; }

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Autora · Viatges dels alts càrrecs{% endblock %}
+{% block description %}Qui ha fet aquest web d'anàlisi independent dels viatges dels alts càrrecs de la Generalitat de Catalunya.{% endblock %}
+{% block content %}
+<h1>Autora</h1>
+<p class="lead">Aquest web l'ha fet <strong>{{ autora.nom }}</strong> com a projecte independent, a partir de dades obertes.</p>
+
+<section class="card">
+  <h2>Sobre el projecte</h2>
+  <p>No és un web oficial ni està vinculat a la Generalitat de Catalunya. Les dades provenen del conjunt
+    <a href="{{ dataset_url }}">Viatges a l'estranger dels alts càrrecs i personal directiu</a> del portal de
+    Dades Obertes de Catalunya, i s'actualitzen cada setmana. El codi és obert i es pot consultar al
+    <a href="{{ repo_url }}">repositori de GitHub</a>.</p>
+  <p>Si trobes un error, una dada que no quadra o vols proposar una millora, pots obrir una
+    <a href="{{ repo_url }}/issues">incidència al repositori</a>.
+    <a href="{{ base }}metodologia/">Aquí s'explica com es tracten les dades</a>.</p>
+</section>
+
+<section class="card">
+  <h2>Enllaços</h2>
+  <ul>
+    {% for text, url in autora.enllacos %}
+    <li><a href="{{ url }}" rel="me">{{ text }}</a></li>
+    {% endfor %}
+    <li><a href="{{ repo_url }}">Codi del projecte</a></li>
+  </ul>
+</section>
+{% endblock %}
