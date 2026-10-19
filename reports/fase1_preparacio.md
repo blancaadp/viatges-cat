@@ -1,9 +1,9 @@
 # Fase 1 · Preparació de les dades
 
-_Instantània descarregada el 2026-10-17T18:13:55.520019+00:00. Les dades s'analitzen tal com venen: vegeu l'[ADR 0004](../docs/decisions/0004-dades-tal-com-venen.md)._
+_Instantània descarregada el 2026-10-19T11:35:03.923689+00:00. Les dades s'analitzen tal com venen: vegeu l'[ADR 0004](../docs/decisions/0004-dades-tal-com-venen.md)._
 
-- Viatges: **1528** · trams de destinació: **1752**
-- Exclosos de l'anàlisi (durada > p99 = 11 dies): **13**, que sumen 46,582 € de 4,857,784 €
+- Viatges: **1529** · trams de destinació: **1753**
+- Exclosos de l'anàlisi (durada > p99 = 11 dies): **13**, que sumen 46,582 € de 4,861,124 €
 - Registres amb anotacions manuals: 20
 - Ciutats diferents després de normalitzar: 330 (abans 410)
 - Països diferents: 83
@@ -35,7 +35,7 @@ _Instantània descarregada el 2026-10-17T18:13:55.520019+00:00. Les dades s'anal
 | flag_import_inconsistent   |           0 |
 | flag_import_incomplet      |           3 |
 | flag_duplicat              |          16 |
-| flag_possible_desdoblament |           2 |
+| flag_possible_desdoblament |           4 |
 | flag_desti_sense_pais      |           0 |
 | flag_no_estranger          |           5 |
 | flag_tram_repetit          |           4 |
@@ -74,6 +74,8 @@ _Instantània descarregada el 2026-10-17T18:13:55.520019+00:00. Les dades s'anal
 
 | grup_viatge   | id            | nom                     | data_inici_iso   |   total_eur |
 |:--------------|:--------------|:------------------------|:-----------------|------------:|
+| racc-2        | CMH018        | Jordi Foz Dalmau        | 2018-07-17       |     3636.25 |
+| racc-2        | racc-2        | Jordi Foz i Dalmau      | 2018-07-17       |     1167.97 |
 | raccERGO-2047 | raccERGO-2047 | Elisabet Cirici i Amell | 2026-05-19       |     1657.8  |
 | raccERGO-2047 | raccERGO-2068 | Elisabet Cirici i Amell | 2026-05-19       |     1371.03 |
 
