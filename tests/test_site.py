@@ -158,7 +158,8 @@ def test_pagina_de_destinacions_i_sense_sexe_si_no_es_pot_estimar(site):
     assert 'id="sexe"' not in persones
 
 
-def test_pagina_de_l_autora(site):
-    page = (site / "autora" / "index.html").read_text(encoding="utf-8")
-    assert "Autora" in page
-    assert "github.com/blancaadp" in page
+def test_metodologia_comenca_amb_l_avis_de_web_no_oficial(site):
+    page = (site / "metodologia" / "index.html").read_text(encoding="utf-8")
+    assert page.index('class="avis"') < page.index("D'on surten les dades")
+    assert "Aquest no és un web oficial del Govern." in page
+    assert "autora/" not in page  # la pàgina Autora ja no existeix

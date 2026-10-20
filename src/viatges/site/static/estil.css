@@ -261,3 +261,8 @@ table.split td:first-child { min-width: 9rem; }
 .sex-stacks { display: grid; gap: 10px; margin: 8px 0 12px; }
 .sex-stacks > div { display: grid; grid-template-columns: 6rem 1fr; align-items: center; gap: 12px; }
 .sex-label { font-size: 0.9rem; }
+
+/* Avís destacat (metodologia): no és un web oficial */
+.avis { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--series-1); border-radius: var(--radius); padding: 16px 20px; margin: 16px 0 28px; font-size: 1.05rem; }
+.avis p { margin: 0 0 8px; }
+.avis p:last-child { margin-bottom: 0; }
