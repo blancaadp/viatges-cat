@@ -13,7 +13,30 @@
 </section>
 <p class="note small">No hi compten els viatges ni els trams a l'Estat espanyol. Quan un viatge té diverses
   destinacions, la seva despesa es reparteix a parts iguals entre elles perquè un mateix import no es
-  compti dues vegades. <a href="{{ base }}metodologia/">Més detalls</a>.</p>
+  compti dues vegades. <a href="{{ base }}sobre/#destinacions">Més detalls</a>.</p>
+
+<section class="card">
+  <h2>On s'ha viatjat i on s'ha gastat més</h2>
+  <p class="sub">Cada bombolla és un país; l'àrea és proporcional al nombre de viatges o a la despesa.
+    Passa el ratolí per sobre d'una bombolla (o toca-la) per veure'n les xifres.</p>
+  <figure class="mapa" data-mesura="viatges" data-regio="mon">
+    <div class="map-controls">
+      <div class="segmented" role="group" aria-label="Mesura">
+        <button type="button" data-mesura="viatges" aria-pressed="true">Més viatges</button>
+        <button type="button" data-mesura="despesa" aria-pressed="false">Més despesa</button>
+      </div>
+      <div class="segmented" role="group" aria-label="Zona">
+        <button type="button" data-regio="mon" aria-pressed="true">Món</button>
+        <button type="button" data-regio="europa" aria-pressed="false">Europa</button>
+      </div>
+    </div>
+    {{ mapes.mon | safe }}
+    {{ mapes.europa | safe }}
+    <figcaption class="note small">A la vista del món, els països europeus no porten etiqueta: tria
+      «Europa» per veure'ls en detall. Les xifres de tots els països són a la taula de sota.
+      Mapa base: Natural Earth (domini públic).</figcaption>
+  </figure>
+</section>
 
 {% for clau, titol, singular, article in (("paisos", "països", "País", "Els"), ("ciutats", "ciutats", "Ciutat", "Les")) %}
 {% set d = paisos if clau == "paisos" else ciutats %}
@@ -56,3 +79,4 @@
 </section>
 {% endfor %}
 {% endblock %}
+{% block scripts %}<script src="{{ base }}mapa.js?v={{ versio }}" defer></script>{% endblock %}

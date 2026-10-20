@@ -37,7 +37,7 @@ SECCIONS = [
     ("departaments/", "Departaments"),
     ("destinacions/", "Destinacions"),
     ("persones/", "Persones"),
-    ("metodologia/", "Metodologia"),
+    ("sobre/", "Sobre"),
 ]
 MONTHS = ["gener", "febrer", "març", "abril", "maig", "juny", "juliol", "agost",
           "setembre", "octubre", "novembre", "desembre"]  # fmt: skip
@@ -668,6 +668,7 @@ def destination_table(data: SiteData, level: str, base: str) -> list[dict]:
         rows.append(
             {
                 "label": label,
+                "iso2": g["iso2"].iloc[0],
                 "href": f"{base}viatges/?pais={g['iso2'].iloc[0]}" if level == "pais" else None,
                 "n": n,
                 "persones": int(g["persona_id"].nunique()),
@@ -678,6 +679,164 @@ def destination_table(data: SiteData, level: str, base: str) -> list[dict]:
             }
         )
     return rows
+
+
+# ---------------------------------------------------------------------------
+# Mapa de bombolles (Natural Earth 1:110m, projecció Equal Earth)
+# ---------------------------------------------------------------------------
+
+# Països massa petits per sortir al mapa 1:110m: coordenades aproximades de la capital
+SMALL_COUNTRIES = {
+    "AD": (1.52, 42.51),
+    "CV": (-23.51, 14.93),
+    "HK": (114.17, 22.32),
+    "MC": (7.42, 43.74),
+    "MT": (14.51, 35.90),
+    "MU": (57.50, -20.16),
+}
+MAP_REGIONS = {
+    # nom: (lon mínima, lat mínima, lon màxima, lat màxima)
+    "mon": (-180.0, -58.0, 180.0, 84.0),
+    "europa": (-25.0, 33.0, 45.0, 71.0),
+}
+MAP_WIDTH = 960
+
+
+def equal_earth(lon: float, lat: float) -> tuple[float, float]:
+    """Projecció Equal Earth (Šavrič et al., 2018), en unitats del radi terrestre."""
+    a1, a2, a3, a4 = 1.340264, -0.081106, 0.000893, 0.003796
+    lam, phi = math.radians(lon), math.radians(lat)
+    theta = math.asin(math.sqrt(3) / 2 * math.sin(phi))
+    t2 = theta * theta
+    t6 = t2 * t2 * t2
+    x = (
+        2
+        * math.sqrt(3)
+        * lam
+        * math.cos(theta)
+        / (3 * (9 * a4 * t6 * t2 + 7 * a3 * t6 + 3 * a2 * t2 + a1))
+    )
+    y = theta * (a4 * t6 * t2 + a3 * t6 + a2 * t2 + a1)
+    return x, -y  # la y de l'SVG creix cap avall
+
+
+def load_world() -> list[dict]:
+    world = json.loads((HERE / "geo" / "paisos-110m.json").read_text(encoding="utf-8"))
+    return world["paisos"]
+
+
+def bubble_map(rows: list[dict], region: str, world: list[dict], names: dict[str, str]) -> str:
+    """Mapa SVG amb una capa de bombolles per mesura (viatges i despesa).
+
+    L'àrea de cada bombolla és proporcional al valor. Les dues capes es mostren o s'amaguen
+    amb CSS segons el selector de la pàgina.
+    """
+    lon0, lat0, lon1, lat1 = MAP_REGIONS[region]
+    # Vores de la regió (també l'equador i el meridià central, on la projecció s'eixampla)
+    lons, lats = (lon0, lon1, (lon0 + lon1) / 2), (lat0, lat1, min(max(0.0, lat0), lat1))
+    corners = [equal_earth(lo, la) for lo in lons for la in lats]
+    xs, ys = [c[0] for c in corners], [c[1] for c in corners]
+    x_min, x_max, y_min, y_max = min(xs), max(xs), min(ys), max(ys)
+    k = MAP_WIDTH / (x_max - x_min)
+    height = round((y_max - y_min) * k)
+
+    def pt(lon: float, lat: float) -> tuple[float, float]:
+        x, y = equal_earth(lon, lat)
+        return (x - x_min) * k, (y - y_min) * k
+
+    margin = 2  # graus: inclou els països que toquen la vora
+    paths = []
+    anchors = dict(SMALL_COUNTRIES)
+    for country in world:
+        if country["iso2"]:
+            anchors.setdefault(country["iso2"], (country["lon"], country["lat"]))
+        parts = []
+        for ring in country["rings"]:
+            if not any(lon0 - margin <= x <= lon1 + margin and lat0 - margin <= y <= lat1 + margin
+                       for x, y in ring):  # fmt: skip
+                continue
+            coords = [pt(x, y) for x, y in ring]
+            parts.append("M" + "L".join(f"{x:.0f},{y:.0f}" for x, y in coords) + "Z")
+        if parts:
+            paths.append(f'<path class="land" d="{"".join(parts)}"/>')
+
+    layers = []
+    r_max = MAP_WIDTH * (0.032 if region == "mon" else 0.05)
+    for measure, key in (("viatges", "n"), ("despesa", "total")):
+        shown = [r for r in rows if r["iso2"] in anchors and r[key] > 0]
+        shown = [r for r in shown if lon0 <= anchors[r["iso2"]][0] <= lon1
+                 and lat0 <= anchors[r["iso2"]][1] <= lat1]  # fmt: skip
+        top = max((r[key] for r in shown), default=1)
+        shown.sort(key=lambda r: r[key], reverse=True)  # les grans a sota, les petites a sobre
+        circles, labels, taken = [], [], []
+        n_labels = 6 if region == "mon" else 10
+        europe = MAP_REGIONS["europa"]
+        placed = []  # (fila, cx, cy, radi)
+        for r in shown:
+            cx, cy = pt(*anchors[r["iso2"]])
+            placed.append((r, cx, cy, max(2.5, r_max * math.sqrt(r[key] / top))))
+        # Les etiquetes no poden tapar cap bombolla mitjana o gran (excepte la pròpia)
+        obstacles = [(cx, cy, radius) for _, cx, cy, radius in placed if radius >= 6]
+        for r, cx, cy, radius in placed:
+            name = names.get(r["iso2"], r["label"])
+            tip = f"{name}: {fmt_int(r['n'])} viatges · {fmt_eur(r['total'])}"
+            circles.append(
+                f'<circle class="bubble" cx="{cx:.1f}" cy="{cy:.1f}" r="{radius:.1f}" '
+                f'tabindex="0" role="img" aria-label="{tip}" data-tip="{tip}"/>'
+            )
+            lon, lat = anchors[r["iso2"]]
+            in_europe = europe[0] <= lon <= europe[2] and europe[1] <= lat <= europe[3]
+            if len(labels) >= n_labels or (region == "mon" and in_europe):
+                continue  # al món, Europa s'etiqueta a la seva pròpia vista
+            text = f"{name} · {fmt_int(r[key]) if key == 'n' else fmt_compact_eur(r[key])}"
+            others = [o for o in obstacles if (o[0], o[1]) != (cx, cy)]
+            box = _place_label(text, cx, cy, radius, taken, others, MAP_WIDTH, height)
+            if box:
+                taken.append(box)
+                x, y, anchor = box[4], box[5], box[6]
+                labels.append(
+                    f'<text class="map-label" x="{x:.1f}" y="{y:.1f}" text-anchor="{anchor}">'
+                    f"{text}</text>"
+                )
+        layers.append(f'<g class="capa capa-{measure}">{"".join(circles)}{"".join(labels)}</g>')
+
+    title = "Mapa del món" if region == "mon" else "Mapa d'Europa"
+    return (
+        f'<svg class="mapa-svg mapa-{region}" viewBox="0 0 {MAP_WIDTH} {height}" role="group" '
+        f'aria-label="{title} amb les destinacions" preserveAspectRatio="xMidYMid meet">'
+        f'<g class="terra">{"".join(paths)}</g>{"".join(layers)}</svg>'
+    )
+
+
+def _box_hits_circle(box, circle) -> bool:
+    x0, y0, x1, y1 = box
+    cx, cy, r = circle
+    nx, ny = min(max(cx, x0), x1), min(max(cy, y0), y1)  # punt de la caixa més proper al centre
+    return (nx - cx) ** 2 + (ny - cy) ** 2 < r * r
+
+
+def _place_label(text, cx, cy, radius, taken, obstacles, width, height):
+    """Busca un lloc per a l'etiqueta (dreta, esquerra, dalt, baix) sense tapar cap altra
+    etiqueta ni cap bombolla de les `obstacles`.
+
+    Retorna (x0, y0, x1, y1, x, y, text-anchor) o None si no hi cap enlloc.
+    """
+    w, h, gap = len(text) * 7.2, 14, 4
+    candidates = [
+        (cx + radius + gap, cy + 4, "start"),
+        (cx - radius - gap, cy + 4, "end"),
+        (cx, cy - radius - gap, "middle"),
+        (cx, cy + radius + gap + 10, "middle"),
+    ]
+    for x, y, anchor in candidates:
+        x0 = {"start": x, "end": x - w, "middle": x - w / 2}[anchor]
+        box = (x0, y - 11, x0 + w, y - 11 + h)
+        inside = box[0] >= 0 and box[2] <= width and box[1] >= 0 and box[3] <= height
+        free = all(box[2] < t[0] or box[0] > t[2] or box[3] < t[1] or box[1] > t[3] for t in taken)
+        clear = not any(_box_hits_circle(box, c) for c in obstacles)
+        if inside and free and clear:
+            return (*box, x, y, anchor)
+    return None
 
 
 def destinations_context(data: SiteData, base: str) -> dict:
@@ -714,6 +873,12 @@ def destinations_context(data: SiteData, base: str) -> dict:
         ("Viatges a l'estranger", fmt_int(len(abroad))),
         ("Despesa d'aquests viatges", fmt_compact_eur(abroad["total_eur"].sum())),
     ]
+    country_rows = destination_table(data, "pais", base)
+    world = load_world()
+    names = country_names(data.trams)
+    out["mapes"] = {
+        region: bubble_map(country_rows, region, world, names) for region in MAP_REGIONS
+    }
     out["fmt_eur"] = fmt_eur
     out["fmt_int"] = fmt_int
     return out
@@ -913,11 +1078,13 @@ def build_site(db_path: Path, manual_dir: Path, out_dir: Path, base: str = "/") 
 
     render("inici.html", "index.html", page="inici", **home_context(data, base))
     render("viatges.html", "viatges/index.html", page="viatges")
-    render("metodologia.html", "metodologia/index.html", page="metodologia",
+    render("sobre.html", "sobre/index.html", page="sobre",
            n_exclosos=int(data.viatges["exclos_analisi"].sum()),
            llindar=int(data.viatges.loc[data.viatges["exclos_analisi"], "durada_dies"].min() - 1)
            if data.viatges["exclos_analisi"].any() else None)  # fmt: skip
     render("404.html", "404.html", page=None)
+    # L'antiga pàgina de metodologia ara és un apartat de «Sobre»
+    render("redireccio.html", "metodologia/index.html", desti=f"{base}sobre/#metodologia")
     render("persones.html", "persones/index.html", page="persones", **people_context(data, base))
     render("departaments.html", "departaments/index.html", page="departaments",
            **departments_context(data, base))  # fmt: skip

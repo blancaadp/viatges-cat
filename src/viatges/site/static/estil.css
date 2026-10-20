@@ -262,7 +262,7 @@ table.split td:first-child { min-width: 9rem; }
 .sex-stacks > div { display: grid; grid-template-columns: 6rem 1fr; align-items: center; gap: 12px; }
 .sex-label { font-size: 0.9rem; }
 
-/* Avís destacat (metodologia): no és una web oficial */
+/* Avís destacat (Sobre): no és una web oficial */
 .avis { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--series-1); border-radius: var(--radius); padding: 16px 20px; margin: 16px 0 28px; font-size: 1.05rem; }
 .avis p { margin: 0 0 8px; }
 .avis p:last-child { margin-bottom: 0; }
@@ -276,3 +276,27 @@ table.split td:first-child { min-width: 9rem; }
 /* Els enllaços del peu es veuen com a enllaços, no com el menú de la capçalera */
 .site-footer nav a { color: var(--link); text-decoration: underline; margin-left: 0; padding: 0; }
 @media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 20px; } }
+
+/* Pàgina «Sobre»: índex i apartats */
+.toc { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0 0 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.toc a { font-weight: 600; color: var(--link); margin-left: 0; }
+.prose section { scroll-margin-top: 16px; }
+.prose section > h2 { font-size: 1.5rem; margin-top: 2.5rem; padding-top: 0.5rem; }
+.prose h3 { font-size: 1.1rem; margin: 1.5rem 0 0.25rem; scroll-margin-top: 16px; }
+
+/* Mapa de bombolles (Destinacions) */
+.mapa { margin: 12px 0 0; }
+.map-controls { display: none; flex-wrap: wrap; gap: 8px 12px; margin-bottom: 12px; }
+html.js .map-controls { display: flex; }
+.segmented { display: inline-flex; gap: 4px; padding: 3px; background: color-mix(in srgb, var(--ink) 6%, transparent); border-radius: 8px; }
+.segmented button { font: inherit; font-size: 0.9rem; border: 0; background: transparent; color: var(--ink-2); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.segmented button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+.mapa-svg { width: 100%; height: auto; display: block; }
+.mapa[data-regio="mon"] .mapa-europa, .mapa[data-regio="europa"] .mapa-mon { display: none; }
+.mapa[data-mesura="viatges"] .capa-despesa, .mapa[data-mesura="despesa"] .capa-viatges { display: none; }
+.mapa .land { fill: color-mix(in srgb, var(--ink) 9%, var(--surface)); stroke: var(--surface); stroke-width: 0.6; }
+.mapa .bubble { fill: var(--series-1); fill-opacity: 0.55; stroke: var(--surface); stroke-width: 1.5; cursor: default; }
+.mapa .bubble:hover, .mapa .bubble:focus-visible { fill-opacity: 0.9; outline: none; }
+.mapa .map-label { font: 600 12px var(--font); fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; pointer-events: none; }
+.mapa figcaption { margin-top: 8px; }
+@media (max-width: 600px) { .mapa .map-label { font-size: 22px; stroke-width: 5px; } }

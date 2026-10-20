@@ -116,3 +116,6 @@ de Vercel (un sol cop):
 
 [Dades Obertes de Catalunya](https://analisi.transparenciacatalunya.cat/d/5kte-hque) · Generalitat de Catalunya.
 Consulta les condicions de reutilització al mateix portal.
+
+Mapa base: [Natural Earth](https://www.naturalearthdata.com/) 1:110m (domini públic), simplificat a
+`src/viatges/site/geo/paisos-110m.json`.

@@ -5,13 +5,16 @@ import pytest
 from conftest import ROWS, write_snapshot
 
 from viatges.site import (
+    bubble_map,
     build_site,
     category_shares,
     column_chart,
+    equal_earth,
     fmt_compact_eur,
     fmt_date,
     fmt_eur,
     linkify,
+    load_world,
     person_sex,
 )
 from viatges.store import build_database
@@ -58,7 +61,7 @@ def site(tmp_path, manual, monkeypatch):
 def test_build_site_genera_totes_les_pagines(site):
     assert (site / "index.html").exists()
     assert (site / "viatges" / "index.html").exists()
-    assert (site / "metodologia" / "index.html").exists()
+    assert (site / "sobre" / "index.html").exists()
     assert (site / "persones" / "index.html").exists()
     assert (site / "persona" / "persona-b" / "index.html").exists()
     assert len(list((site / "viatge").iterdir())) == len(ROWS)
@@ -158,9 +161,11 @@ def test_pagina_de_destinacions_i_sense_sexe_si_no_es_pot_estimar(site):
     assert 'id="sexe"' not in persones
 
 
-def test_metodologia_comenca_amb_l_avis_de_web_no_oficial(site):
-    page = (site / "metodologia" / "index.html").read_text(encoding="utf-8")
-    assert page.index('class="avis"') < page.index("D'on surten les dades")
+def test_sobre_comenca_amb_l_avis_i_te_els_apartats(site):
+    page = (site / "sobre" / "index.html").read_text(encoding="utf-8")
+    assert page.index('class="avis"') < page.index('id="metodologia"')
+    assert page.index('id="metodologia"') < page.index('id="dades"') < page.index('id="autora"')
+    assert "Blanca Domènech Pellejà" in page
     assert "Aquesta no és una web oficial de la Generalitat de Catalunya." in page
     assert "autora/" not in page  # la pàgina Autora ja no existeix
 
@@ -169,7 +174,47 @@ def test_peu_amb_navegacio_dades_i_avis(site):
     page = (site / "persones" / "index.html").read_text(encoding="utf-8")
     footer = page[page.index('<footer class="site-footer">') :]
     assert "<h2>Navegació</h2>" in footer and 'id="peu-dades">Dades</h2>' in footer
-    for path in ["viatges/", "departaments/", "destinacions/", "persones/", "metodologia/"]:
+    for path in ["viatges/", "departaments/", "destinacions/", "persones/", "sobre/"]:
         assert f'href="/viatges-cat/{path}"' in footer
     assert "Aquesta no és una web oficial de la Generalitat de Catalunya." in footer
     assert "Govern" not in footer
+
+
+def test_l_adreca_antiga_de_metodologia_redirigeix_a_sobre(site):
+    page = (site / "metodologia" / "index.html").read_text(encoding="utf-8")
+    assert "url=/viatges-cat/sobre/#metodologia" in page
+
+
+def test_cap_enllac_a_metodologia_fora_de_la_redireccio(site):
+    for f in site.rglob("*.html"):
+        if f.parent.name != "metodologia":
+            assert "/metodologia/" not in f.read_text(encoding="utf-8"), f
+
+
+def test_equal_earth_es_simetrica_i_conserva_l_origen():
+    assert equal_earth(0, 0) == (0.0, -0.0)
+    x1, y1 = equal_earth(30, 45)
+    x2, y2 = equal_earth(-30, -45)
+    assert x1 == pytest.approx(-x2) and y1 == pytest.approx(-y2)
+
+
+def test_bubble_map_te_una_capa_per_mesura_i_inclou_paisos_petits():
+    rows = [
+        {"iso2": "BE", "label": "Bèlgica", "n": 300, "total": 500_000.0},
+        {"iso2": "AD", "label": "Andorra", "n": 30, "total": 20_000.0},  # no surt al mapa 1:110m
+        {"iso2": "JP", "label": "Japó", "n": 20, "total": 90_000.0},
+    ]
+    names = {"BE": "Bèlgica", "AD": "Andorra", "JP": "Japó"}
+    svg = bubble_map(rows, "europa", load_world(), names)
+    assert 'class="capa capa-viatges"' in svg and 'class="capa capa-despesa"' in svg
+    assert svg.count('class="bubble"') == 4  # BE i AD, a cada capa; el Japó queda fora d'Europa
+    assert "Andorra: 30 viatges" in svg
+    world = bubble_map(rows, "mon", load_world(), names)
+    assert world.count('class="bubble"') == 6
+    assert ">Bèlgica" not in world  # al món, els països europeus no porten etiqueta
+
+
+def test_pagina_de_destinacions_te_el_mapa(site):
+    page = (site / "destinacions" / "index.html").read_text(encoding="utf-8")
+    assert 'class="mapa"' in page and "mapa-mon" in page and "mapa-europa" in page
+    assert 'data-mesura="despesa"' in page and 'data-regio="europa"' in page

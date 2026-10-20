@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Sobre aquesta web · Viatges dels alts càrrecs{% endblock %}
+{% block description %}Com es fa aquesta web: d'on surten les dades, com es tracten i qui l'ha feta.{% endblock %}
+{% block content %}
+<article class="prose narrow">
+  <h1>Sobre aquesta web</h1>
+
+  <aside class="avis" role="note" aria-label="Avís">
+    <p><strong>Aquesta no és una web oficial de la Generalitat de Catalunya.</strong> És un projecte independent que fa servir
+      dades públiques per facilitar l'anàlisi dels viatges a l'estranger dels alts càrrecs i del personal
+      directiu de la Generalitat de Catalunya.</p>
+    <p>No té cap vinculació amb la Generalitat de Catalunya ni amb cap administració pública.</p>
+  </aside>
+
+  <nav class="toc" aria-label="En aquesta pàgina">
+    <a href="#metodologia">Metodologia</a>
+    <a href="#dades">Dades</a>
+    <a href="#autora">Autora</a>
+  </nav>
+
+  <section id="metodologia" aria-labelledby="titol-metodologia">
+    <h2 id="titol-metodologia">Metodologia</h2>
+
+    <h3>Les dades, tal com venen</h3>
+    <p>Aquesta web no corregeix cap valor. Els imports, les dates i els textos són els que publica la
+      Generalitat. Quan detectem un problema (un import incomplet, un duplicat, una data que sembla
+      errònia), el registre porta una <strong>marca</strong> que ho explica, però les xifres es calculen
+      amb el valor original.</p>
+
+    <h3 id="que-no-compta">Què no compta a les xifres</h3>
+    <ul>
+      <li><strong>Viatges amb una durada anòmala.</strong> Excloem els viatges que duren més que el
+        99% de la resta{% if llindar %} (ara mateix, més de {{ llindar }} dies){% endif %}. Són
+        {{ n_exclosos }} registres i gairebé sempre són errors de data: per exemple, un viatge d'un dia
+        publicat amb una data de tornada dos mesos més tard.</li>
+      <li><strong>Duplicats.</strong> Alguns viatges s'han publicat dues vegades, amb identificadors
+        diferents. Comptem només el registre original.</li>
+    </ul>
+    <p>Tots dos tipus de registre continuen visibles a l'explorador i a les dades descarregables.</p>
+
+    <h3 id="imports">Com llegir els imports</h3>
+    <ul>
+      <li>L'import és <strong>per registre</strong>, no per persona: alguns registres inclouen les
+        despeses de tota la comitiva i d'altres només les de qui viatja.</li>
+      <li>Un import de 0 € no sempre vol dir que el viatge fos gratuït. De vegades les despeses
+        s'imputen al registre d'una altra persona, les paga un tercer o encara s'estan tramitant;
+        quan les observacions ho diuen, el registre ho indica.</li>
+      <li>Els viatges de l'any en curs es van publicant amb retard: les xifres de l'any actual no són
+        definitives.</li>
+    </ul>
+
+    <h3 id="destinacions">Destinacions</h3>
+    <p>Les destinacions arriben en text lliure ("Brussels", "Brussel·les", "BRUSSEL·LES"…). Per poder
+      comptar per país, les normalitzem amb un diccionari; el nom original es conserva sempre.</p>
+    <p>L'anàlisi de destinacions no inclou els trams a l'Estat espanyol. Quan un viatge visita
+      diverses destinacions (països o ciutats), la seva despesa es reparteix a parts iguals entre les
+      destinacions diferents. Així, la suma de totes les destinacions coincideix amb la despesa
+      dels viatges, però l'import atribuït a cada destinació és aproximat: en un viatge a tres
+      ciutats no sabem quant s'ha gastat a cadascuna. Al mapa, cada bombolla se situa al centre del
+      país.</p>
+
+    <h3 id="departaments">Departaments i àmbits</h3>
+    <p>Els departaments canvien de nom a cada legislatura, així que els agrupem en
+      <strong>àmbits</strong> estables (Acció Exterior, Cultura, Empresa…). El nom original es
+      conserva sempre.</p>
+
+    <h3 id="persones">Persones</h3>
+    <p>El nom d'una mateixa persona no sempre s'escriu igual ("Natàlia Mas i Guix" i "Natàlia Mas
+      Guix", amb accent o sense…). Els unifiquem automàticament ignorant accents, majúscules i la «i»
+      entre cognoms. Els pocs casos que això no resol (un segon cognom que falta, un nom abreujat)
+      s'unifiquen a mà, només quan el càrrec ho confirma. El nom original de cada registre es
+      conserva.</p>
+    <p>La <strong>despesa mitjana diària</strong> d'una persona és la seva despesa total dividida pel
+      total de dies de viatge. Al rànquing només hi surten les persones amb tres viatges o més.
+      Recorda que l'import és per registre: en els viatges del president i dels consellers sovint
+      inclou la despesa de tota la comitiva.</p>
+
+    <h3 id="partides">Distribució de la despesa per partida</h3>
+    <p>Cada viatge detalla quatre partides: dietes i manutenció, allotjament, transport i altres
+      despeses. A les pàgines de departaments i de persones, el percentatge de cada partida es
+      calcula sobre la suma de les quatre, de manera que sempre sumen el 100&nbsp;%. Només
+      compten els viatges que entren a les xifres. En una persona, només hi surt la despesa dels
+      seus viatges; en un departament, la de tots els viatges de l'àmbit.</p>
+
+    <h3 id="sexe">Sexe</h3>
+    <p>El conjunt de dades no inclou el sexe de les persones. L'<strong>estimem</strong> a partir del
+      gènere gramatical del càrrec (conseller o consellera, director o directora, secretari o
+      secretària…), perquè en català els càrrecs es declinen. Els pocs casos on el càrrec és neutre
+      («gerent», «cap») o contradictori es resolen a mà. És una classificació binària feta només per
+      a una anàlisi agregada i pot tenir errors; no s'ha de fer servir per etiquetar cap persona
+      concreta.</p>
+
+    <h3>Una dada atípica no és una irregularitat</h3>
+    <p>Un viatge car o llarg pot tenir una explicació perfectament raonable. Aquesta web vol facilitar
+      l'accés a unes dades que ja són públiques, no assenyalar ningú.</p>
+  </section>
+
+  <section id="dades" aria-labelledby="titol-dades">
+    <h2 id="titol-dades">Dades</h2>
+
+    <h3>D'on surten</h3>
+    <p>Del conjunt <a href="{{ dataset_url }}">Viatges a l'estranger dels alts càrrecs i personal
+      directiu de la Generalitat de Catalunya</a>, publicat al portal de Dades Obertes de Catalunya.</p>
+
+    <h3>Com s'actualitzen</h3>
+    <p>Cada dilluns se'n descarrega una còpia completa i es compara amb l'anterior per detectar
+      registres nous, esborrats o modificats. Les còpies es conserven, de manera que es pot saber
+      quan va aparèixer cada viatge al portal. Les dades d'aquesta web són del {{ updated }}.</p>
+
+    <h3>Descàrregues</h3>
+    <ul>
+      <li><a href="{{ base }}dades/viatges.csv">Viatges (CSV)</a>: tots els registres, amb els valors
+        originals i les marques que hi afegeix aquesta web.</li>
+      <li><a href="{{ base }}dades/trams.csv">Destinacions normalitzades (CSV)</a>: una fila per
+        cada destinació de cada viatge, amb la ciutat i el país normalitzats.</li>
+    </ul>
+  </section>
+
+  <section id="autora" aria-labelledby="titol-autora">
+    <h2 id="titol-autora">Autora</h2>
+    <p>Aquesta web l'ha feta <strong>Blanca Domènech Pellejà</strong>. Va néixer com a continuació
+      d'una pràctica de l'assignatura de Visualització de dades del Màster Universitari en Ciència de
+      Dades de la UOC, en què es van analitzar per primera vegada aquestes dades amb
+      <a href="https://blancaadp.github.io/viz_blancaadp.github.io/">una sèrie de gràfics</a>.</p>
+    <p>Aprofitant les hores dedicades a aquell treball, el projecte ha anat creixent: ara les dades es
+      descarreguen cada setmana, es fa un seguiment dels canvis que hi fa el portal i s'ha construït
+      aquesta web per poder-les consultar amb més facilitat i millorar-ne el producte final.
+      L'objectiu és divulgatiu: acostar a tothom unes dades que ja són públiques i explicar amb
+      transparència com s'han tractat.</p>
+  </section>
+</article>
+{% endblock %}
