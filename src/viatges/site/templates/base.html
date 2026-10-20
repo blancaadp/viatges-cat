@@ -12,9 +12,17 @@
   <a class="skip" href="#contingut">Saltar al contingut</a>
   <header class="site-header">
     <div class="wrap header-row">
-      <a class="brand" href="{{ base }}">Viatges dels alts càrrecs</a>
+      <a class="brand" href="{{ base }}"{% if page == "inici" %} aria-current="page"{% endif %}>
+        <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-5.5h4V20h4.5V9.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="brand-text">
+          <span class="brand-name">Viatges dels alts càrrecs</span>
+          <span class="brand-tag">Web independent · no oficial</span>
+        </span>
+        <span class="visually-hidden">(inici)</span>
+      </a>
       <nav aria-label="Principal">
-        {% for slug, label in seccions %}
+        {# L'inici és el nom de la web: al menú de dalt no s'hi repeteix (al peu, sí) #}
+        {% for slug, label in seccions if slug %}
         <a href="{{ base }}{{ slug }}"{% if page == (slug.rstrip('/') or 'inici') %} aria-current="page"{% endif %}>{{ label }}</a>
         {% endfor %}
       </nav>
