@@ -15,19 +15,8 @@
   destinacions, la seva despesa es reparteix a parts iguals entre elles perquè un mateix import no es
   compti dues vegades. <a href="{{ base }}sobre/#destinacions">Més detalls</a>.</p>
 
-<nav class="toc" aria-label="Seccions d'aquesta pàgina">
-  <a href="#paisos">Països</a>
-  <a href="#ciutats">Ciutats</a>
-</nav>
-
-{% for clau, titol, singular, article in (("paisos", "països", "País", "Els"), ("ciutats", "ciutats", "Ciutat", "Les")) %}
-{% set d = paisos if clau == "paisos" else ciutats %}
-<section class="seccio" id="{{ clau }}" aria-labelledby="titol-{{ clau }}">
-<h2 class="seccio-titol" id="titol-{{ clau }}">{{ titol | capitalize }}</h2>
-<p class="sub">S'han visitat {{ d.n }} {{ titol }} diferents.</p>
-{% if clau == "paisos" %}
 <section class="card">
-  <h3>Mapa: on s'ha viatjat i on s'ha gastat més</h3>
+  <h2>On s'ha viatjat i on s'ha gastat més</h2>
   <p class="sub">Cada bombolla representa un país i la seva àrea és proporcional al nombre de viatges o a la
     despesa. En passar el ratolí per sobre d'una bombolla, o en tocar-la, es mostren les xifres del país.</p>
   <figure class="mapa" data-mesura="viatges" data-regio="mon">
@@ -48,10 +37,11 @@
       Mapa base: Natural Earth (domini públic).</figcaption>
   </figure>
 </section>
-{% endif %}
+
+{% for clau, titol, singular, article in (("paisos", "països", "País", "Els"), ("ciutats", "ciutats", "Ciutat", "Les")) %}
+{% set d = paisos if clau == "paisos" else ciutats %}
 <section class="card">
-  <h3>{{ titol | capitalize }} amb més despesa i més viatges</h3>
-  <p class="sub">{{ "Els 15 primers" if clau == "paisos" else "Les 15 primeres" }} segons cada mesura.</p>
+  <h2>{{ article }} 15 {{ titol }} amb més despesa i més viatges</h2>
   <div class="tablist" role="tablist" aria-label="Mesura ({{ titol }})">
     <button type="button" role="tab" id="tab-{{ clau }}-despesa" aria-controls="panell-{{ clau }}-despesa" aria-selected="true">Més despesa</button>
     <button type="button" role="tab" id="tab-{{ clau }}-viatges" aria-controls="panell-{{ clau }}-viatges" aria-selected="false" tabindex="-1">Més viatges</button>
@@ -81,13 +71,12 @@
 </section>
 
 <section class="card">
-  <h3>{{ titol | capitalize }}: detall i distribució per partida</h3>
+  <h2>{{ titol | capitalize }}: detall i distribució per partida</h2>
   <p class="sub">{% if clau == "ciutats" %}Les 40 ciutats amb més despesa de {{ d.n }}. {% endif %}Les columnes es poden
     ordenar fent clic a la capçalera, també segons el percentatge de cada partida (en què es gasta més a cada
     destinació).</p>
   {{ llegenda() }}
   {{ taula_destinacions(d.table, singular) }}
-</section>
 </section>
 {% endfor %}
 {% endblock %}
