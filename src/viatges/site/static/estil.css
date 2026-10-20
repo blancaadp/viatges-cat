@@ -262,7 +262,17 @@ table.split td:first-child { min-width: 9rem; }
 .sex-stacks > div { display: grid; grid-template-columns: 6rem 1fr; align-items: center; gap: 12px; }
 .sex-label { font-size: 0.9rem; }
 
-/* Avís destacat (metodologia): no és un web oficial */
+/* Avís destacat (metodologia): no és una web oficial */
 .avis { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--series-1); border-radius: var(--radius); padding: 16px 20px; margin: 16px 0 28px; font-size: 1.05rem; }
 .avis p { margin: 0 0 8px; }
 .avis p:last-child { margin-bottom: 0; }
+
+/* Peu de pàgina: navegació, dades i avís */
+.footer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 14rem)); gap: 24px 48px; margin-bottom: 20px; }
+.site-footer h2 { font-size: 0.95rem; color: var(--ink); margin: 0 0 8px; }
+.site-footer ul { list-style: none; margin: 0; padding: 0; }
+.site-footer li { margin: 0 0 6px; }
+.footer-avis { border-top: 1px solid var(--border); padding-top: 16px; }
+/* Els enllaços del peu es veuen com a enllaços, no com el menú de la capçalera */
+.site-footer nav a { color: var(--link); text-decoration: underline; margin-left: 0; padding: 0; }
+@media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 20px; } }

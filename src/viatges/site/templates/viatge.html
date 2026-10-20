@@ -51,7 +51,7 @@
 {% if notes %}
 <section class="card">
   <h2>Revisió manual</h2>
-  <p class="sub">Notes de la revisió. No modifiquen les dades publicades: les xifres d'aquest web fan servir sempre el valor original.</p>
+  <p class="sub">Notes de la revisió. No modifiquen les dades publicades: les xifres d'aquesta web fan servir sempre el valor original.</p>
   <ul class="notes">
     {% for n in notes %}
     <li><strong>{{ n.camp }}: {{ n.valor }}</strong>. {{ n.motiu }} <span class="muted">Font: {{ n.font }}.</span></li>

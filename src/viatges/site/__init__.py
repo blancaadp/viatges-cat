@@ -30,6 +30,15 @@ log = logging.getLogger(__name__)
 HERE = Path(__file__).parent
 DATASET_URL = "https://analisi.transparenciacatalunya.cat/d/5kte-hque"
 REPO_URL = "https://github.com/blancaadp/viatges-cat"
+# Apartats del web (camí, nom): els fan servir el menú de dalt i el peu de pàgina.
+SECCIONS = [
+    ("", "Inici"),
+    ("viatges/", "Viatges"),
+    ("departaments/", "Departaments"),
+    ("destinacions/", "Destinacions"),
+    ("persones/", "Persones"),
+    ("metodologia/", "Metodologia"),
+]
 MONTHS = ["gener", "febrer", "març", "abril", "maig", "juny", "juliol", "agost",
           "setembre", "octubre", "novembre", "desembre"]  # fmt: skip
 
@@ -227,7 +236,7 @@ def load(db_path: Path, manual_dir: Path) -> SiteData:
         viatges = pd.read_sql("SELECT * FROM viatges", con)
         trams = pd.read_sql("SELECT * FROM trams", con)
         instantanies = pd.read_sql("SELECT * FROM instantanies", con)
-    for col in COLUMNS.values():  # un camp que el portal no publica no ha de trencar el web
+    for col in COLUMNS.values():  # un camp que el portal no publica no ha de trencar la web
         if col not in viatges:
             viatges[col] = None
     for col in [c for c in viatges.columns if c.startswith("flag_")] + ["exclos_analisi"]:
@@ -886,6 +895,7 @@ def build_site(db_path: Path, manual_dir: Path, out_dir: Path, base: str = "/") 
     common = {
         "base": base,
         "versio": digest.hexdigest()[:10],
+        "seccions": SECCIONS,
         "dataset_url": DATASET_URL,
         "repo_url": REPO_URL,
         "updated": fmt_date(updated, long=True),

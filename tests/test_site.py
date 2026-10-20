@@ -161,5 +161,15 @@ def test_pagina_de_destinacions_i_sense_sexe_si_no_es_pot_estimar(site):
 def test_metodologia_comenca_amb_l_avis_de_web_no_oficial(site):
     page = (site / "metodologia" / "index.html").read_text(encoding="utf-8")
     assert page.index('class="avis"') < page.index("D'on surten les dades")
-    assert "Aquest no és un web oficial del Govern." in page
+    assert "Aquesta no és una web oficial de la Generalitat de Catalunya." in page
     assert "autora/" not in page  # la pàgina Autora ja no existeix
+
+
+def test_peu_amb_navegacio_dades_i_avis(site):
+    page = (site / "persones" / "index.html").read_text(encoding="utf-8")
+    footer = page[page.index('<footer class="site-footer">') :]
+    assert "<h2>Navegació</h2>" in footer and 'id="peu-dades">Dades</h2>' in footer
+    for path in ["viatges/", "departaments/", "destinacions/", "persones/", "metodologia/"]:
+        assert f'href="/viatges-cat/{path}"' in footer
+    assert "Aquesta no és una web oficial de la Generalitat de Catalunya." in footer
+    assert "Govern" not in footer

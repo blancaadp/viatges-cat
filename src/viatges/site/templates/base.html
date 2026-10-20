@@ -14,12 +14,9 @@
     <div class="wrap header-row">
       <a class="brand" href="{{ base }}">Viatges dels alts càrrecs</a>
       <nav aria-label="Principal">
-        <a href="{{ base }}"{% if page == "inici" %} aria-current="page"{% endif %}>Inici</a>
-        <a href="{{ base }}viatges/"{% if page == "viatges" %} aria-current="page"{% endif %}>Viatges</a>
-        <a href="{{ base }}departaments/"{% if page == "departaments" %} aria-current="page"{% endif %}>Departaments</a>
-        <a href="{{ base }}destinacions/"{% if page == "destinacions" %} aria-current="page"{% endif %}>Destinacions</a>
-        <a href="{{ base }}persones/"{% if page == "persones" %} aria-current="page"{% endif %}>Persones</a>
-        <a href="{{ base }}metodologia/"{% if page == "metodologia" %} aria-current="page"{% endif %}>Metodologia</a>
+        {% for slug, label in seccions %}
+        <a href="{{ base }}{{ slug }}"{% if page == (slug.rstrip('/') or 'inici') %} aria-current="page"{% endif %}>{{ label }}</a>
+        {% endfor %}
       </nav>
     </div>
   </header>
@@ -28,13 +25,27 @@
   </main>
   <footer class="site-footer">
     <div class="wrap">
-      <p><strong>Aquest no és un web oficial.</strong> Les dades provenen del conjunt
-        <a href="{{ dataset_url }}">Viatges a l'estranger dels alts càrrecs i personal directiu</a>
-        del portal de Dades Obertes de Catalunya i es mostren amb finalitat informativa.
+      <div class="footer-grid">
+        <nav aria-label="Navegació del peu">
+          <h2>Navegació</h2>
+          <ul>
+            {% for slug, label in seccions %}<li><a href="{{ base }}{{ slug }}">{{ label }}</a></li>{% endfor %}
+          </ul>
+        </nav>
+        <section aria-labelledby="peu-dades">
+          <h2 id="peu-dades">Dades</h2>
+          <ul>
+            <li><a href="{{ base }}dades/viatges.csv">Viatges (CSV)</a></li>
+            <li><a href="{{ base }}dades/trams.csv">Destinacions normalitzades (CSV)</a></li>
+            <li><a href="{{ dataset_url }}">Conjunt de dades original</a></li>
+            <li>Actualitzades el {{ updated }}</li>
+          </ul>
+        </section>
+      </div>
+      <p class="footer-avis"><strong>Aquesta no és una web oficial de la Generalitat de Catalunya.</strong>
+        Les dades provenen del conjunt <a href="{{ dataset_url }}">Viatges a l'estranger dels alts càrrecs i
+        personal directiu</a> del portal de Dades Obertes de Catalunya i es mostren amb finalitat informativa.
         Un viatge estadísticament atípic no implica cap irregularitat.</p>
-      <p>Dades actualitzades el {{ updated }} ·
-        <a href="{{ base }}dades/viatges.csv">Descarrega les dades (CSV)</a> ·
-        <a href="{{ base }}metodologia/">Com es fa</a></p>
     </div>
   </footer>
   <div class="tooltip" role="status" hidden></div>
