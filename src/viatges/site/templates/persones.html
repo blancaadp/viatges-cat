@@ -3,18 +3,19 @@
 {% block title %}Persones · Viatges dels alts càrrecs{% endblock %}
 {% block content %}
 <h1>Persones</h1>
-<p class="lead">Qui ha acumulat més despesa en viatges i qui té una despesa diària més alta. Els noms
-  escrits de manera diferent (amb o sense accents, amb la «i» entre cognoms…) s'han unificat.</p>
+<p class="lead">Aquesta secció mostra quines persones han acumulat més despesa en viatges i quines tenen una
+  despesa diària més elevada. Els noms escrits de manera diferent (amb o sense accents, amb la «i» entre
+  cognoms, etc.) s'han unificat.</p>
 
 <section class="card" id="cercador">
-  <h2>Cerca una persona</h2>
+  <h2>Cercador de persones</h2>
   <form class="filters tight" role="search" onsubmit="return false">
     <label class="field grow">
       <span>Nom o càrrec</span>
       <input type="search" id="cerca-persona" name="q" placeholder="P. ex. Illa, consellera, Acció Exterior" autocomplete="off">
     </label>
   </form>
-  <p class="sub" id="resum-persones" aria-live="polite">{{ n_persones }} persones. Mostrant les 10 amb més despesa.</p>
+  <p class="sub" id="resum-persones" aria-live="polite">{{ n_persones }} persones. Es mostren les 10 amb més despesa.</p>
   <div class="table-wrap flat">
     <table class="data people">
       <thead>
@@ -39,7 +40,7 @@
       </tbody>
     </table>
   </div>
-  <p class="more"><button type="button" class="button secondary" id="mostra-totes">Mostra totes les {{ n_persones }} persones</button></p>
+  <p class="more"><button type="button" class="button secondary" id="mostra-totes">Mostrar totes les {{ n_persones }} persones</button></p>
 </section>
 
 <section class="card">

@@ -2,7 +2,7 @@
 {% block title %}Viatges · Viatges dels alts càrrecs{% endblock %}
 {% block content %}
 <h1>Tots els viatges</h1>
-<p class="lead">Cerca per persona, destinació o motiu. Les dades són tal com les publica la Generalitat;
+<p class="lead">Els viatges es poden cercar per persona, destinació o motiu. Les dades es mostren tal com les publica la Generalitat de Catalunya i
   els registres amb alguna incidència porten una marca.</p>
 
 <form class="filters" id="filtres" role="search" onsubmit="return false">
@@ -24,13 +24,13 @@
   </label>
   <label class="check">
     <input type="checkbox" name="amaga">
-    <span>Amaga duplicats i exclosos</span>
+    <span>Amagar duplicats i exclosos</span>
   </label>
 </form>
 
 <div class="results-bar">
   <p id="resum" aria-live="polite">Carregant…</p>
-  <button type="button" class="button secondary" id="csv">Descarrega CSV</button>
+  <button type="button" class="button secondary" id="csv">Descarregar CSV</button>
 </div>
 
 <div class="table-wrap">
@@ -52,6 +52,6 @@
   <span id="pagina"></span>
   <button type="button" class="button secondary" id="seguent">Següent</button>
 </nav>
-<noscript><p>L'explorador necessita JavaScript. Pots <a href="{{ base }}dades/viatges.csv">descarregar totes les dades en CSV</a>.</p></noscript>
+<noscript><p>L'explorador necessita JavaScript. Totes les dades es poden <a href="{{ base }}dades/viatges.csv">descarregar en format CSV</a>.</p></noscript>
 {% endblock %}
 {% block scripts %}<script src="{{ base }}explorador.js?v={{ versio }}" defer></script>{% endblock %}

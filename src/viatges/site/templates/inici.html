@@ -7,10 +7,10 @@
 </section>
 
 <form class="home-search" action="{{ base }}persones/" method="get" role="search">
-  <label for="cerca-inici">Cerca una persona</label>
+  <label for="cerca-inici">Cercador de persones</label>
   <div class="home-search-row">
     <input type="search" id="cerca-inici" name="q" placeholder="Nom o càrrec" autocomplete="off">
-    <button type="submit" class="button">Cerca</button>
+    <button type="submit" class="button">Cercar</button>
   </div>
 </form>
 
@@ -31,7 +31,7 @@
     publiquen amb retard.</p>
   {{ year_chart | safe }}
   <details>
-    <summary>Mostra les dades en una taula</summary>
+    <summary>Mostrar les dades en una taula</summary>
     <table class="data">
       <thead><tr><th scope="col">Any</th><th scope="col" class="num">Despesa</th><th scope="col" class="num">Viatges</th></tr></thead>
       <tbody>
@@ -73,6 +73,6 @@
 </div>
 
 <section class="cta">
-  <a class="button" href="{{ base }}viatges/">Explora tots els viatges</a>
+  <a class="button" href="{{ base }}viatges/">Veure tots els viatges</a>
 </section>
 {% endblock %}

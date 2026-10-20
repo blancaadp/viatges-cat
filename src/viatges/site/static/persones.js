@@ -31,7 +31,7 @@
     if (words.length) {
       resum.textContent = matches.length === 1 ? "1 persona trobada." : `${matches.length} persones trobades.`;
     } else {
-      resum.textContent = showAll ? `${rows.length} persones.` : `${rows.length} persones. Mostrant les ${INITIAL} primeres.`;
+      resum.textContent = showAll ? `${rows.length} persones.` : `${rows.length} persones. Es mostren les ${INITIAL} primeres.`;
     }
     for (const b of document.querySelectorAll("#cercador th button")) {
       b.closest("th").setAttribute("aria-sort", b.dataset.sort === sortKey ? (sortDir > 0 ? "ascending" : "descending") : "none");
