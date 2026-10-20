@@ -1,12 +1,6 @@
-# Genera el web (ADR 0006) després de cada actualització setmanal, quan es canvia el codi a
-# main i també a mà. El web generat queda com a artefacte de l'execució ("github-pages"),
-# descarregable des de la pestanya Actions.
-#
-# La publicació a GitHub Pages només s'executa si la variable del repositori
-# PUBLICAR_WEB val "true" (Settings → Secrets and variables → Actions → Variables).
-# GitHub Pages requereix que el repositori sigui públic o un pla de pagament.
-# Genera el web (ADR 0006) després de cada actualització setmanal, quan es canvia el codi a
-# main i també a mà, i el desplega a Vercel.
+# Genera el web (ADR 0006) i el desplega a Vercel. Només s'executa a mà
+# (Actions → Web → Run workflow): ni els push ni l'actualització setmanal de dades no el
+# disparen, perquè el desplegament el decideix la persona que manté el web.
 #
 # El desplegament només s'executa si la variable del repositori PUBLICAR_WEB val "true"
 # (Settings → Secrets and variables → Actions → Variables) i hi ha els secrets VERCEL_TOKEN,
@@ -15,15 +9,6 @@
 name: Web
 
 on:
-  workflow_run:
-    workflows: ["Actualització setmanal"]
-    types: [completed]
-  push:
-    branches: [main]
-    paths:
-      - "src/viatges/**"
-      - "data/manual/**"
-      - ".github/workflows/web.yml"
   workflow_dispatch: {}
 
 concurrency:
@@ -35,8 +20,6 @@ permissions:
 
 jobs:
   construir:
-    # Després d'una actualització setmanal fallida no es publica res
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:

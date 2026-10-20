@@ -93,9 +93,16 @@ Configuració inicial (un sol cop):
 
 ## Web
 
-El workflow [`web.yml`](.github/workflows/web.yml) genera el web després de cada
-actualització setmanal i de cada canvi al codi, i el deixa com a artefacte descarregable de
-l'execució. Per desplegar-lo a Vercel:
+Mentre es treballa, el web es revisa en local:
+
+```bash
+uv run viatges web && uv run python -m http.server 8000 --directory site
+```
+
+Per publicar-lo, s'executa **a mà** el workflow [`web.yml`](.github/workflows/web.yml)
+(*Actions → Web → Run workflow*). Cap push ni l'actualització setmanal no el despleguen sols:
+les dades noves de cada dilluns arriben al web la propera vegada que s'executa. Configuració
+de Vercel (un sol cop):
 
 1. A Vercel, crea un projecte nou amb el framework «Other». No hi connectis el repositori
    de Git: el web es construeix a GitHub Actions perquè necessita les dades de Turso.

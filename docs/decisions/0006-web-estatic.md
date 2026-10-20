@@ -23,9 +23,10 @@ publicació) només existeix a la nostra base de dades, no a Socrata.
 5. **Xifres:** compten tots els viatges excepte els exclosos per durada (p99, ADR 0004) i els
    duplicats. Ho explica la pàgina de metodologia.
 6. **Publicació:** el workflow `web.yml` reconstrueix la base de dades des de Turso,
-   genera el web i el desplega a Vercel (CLI en format «prebuilt», amb la carpeta `site/`) després
-   de cada actualització setmanal i de cada canvi al codi. El web es construeix a GitHub
-   Actions i no a Vercel, perquè necessita les dades de Turso.
+   genera el web i el desplega a Vercel (CLI en format «prebuilt», amb la carpeta `site/`).
+   El web es construeix a GitHub Actions i no a Vercel, perquè necessita les dades de Turso.
+   **Només s'executa a mà** (revisió 2026-10-20): els canvis es revisen en local i es
+   publiquen quan es decideix, en lloc de desplegar a cada push o cada dilluns.
 
 ## Conseqüències
 
