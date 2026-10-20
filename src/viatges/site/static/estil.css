@@ -300,3 +300,9 @@ html.js .map-controls { display: flex; }
 .mapa .map-label { font: 600 12px var(--font); fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; pointer-events: none; }
 .mapa figcaption { margin-top: 8px; }
 @media (max-width: 600px) { .mapa .map-label { font-size: 22px; stroke-width: 5px; } }
+
+/* Pàgines amb seccions grans (Destinacions: Països / Ciutats) */
+.seccio { scroll-margin-top: 16px; }
+.seccio-titol { font-size: 1.6rem; margin: 2.5rem 0 0.25rem; padding-top: 1.25rem; border-top: 2px solid var(--axis); }
+.seccio > .sub { margin-bottom: 16px; }
+.card > h3 { font-size: 1.1rem; margin: 0 0 0.25rem; }
