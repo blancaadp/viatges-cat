@@ -25,8 +25,9 @@ publicació) només existeix a la nostra base de dades, no a Socrata.
 6. **Publicació:** el workflow `web.yml` reconstrueix la base de dades des de Turso,
    genera el web i el desplega a Vercel (CLI en format «prebuilt», amb la carpeta `site/`).
    El web es construeix a GitHub Actions i no a Vercel, perquè necessita les dades de Turso.
-   **Només s'executa a mà** (revisió 2026-10-20): els canvis es revisen en local i es
-   publiquen quan es decideix, en lloc de desplegar a cada push o cada dilluns.
+   **No es desplega amb els push** (revisió 2026-10-20): els canvis de disseny es revisen en
+   local i es publiquen a mà quan es decideix. **Sí que es desplega sol després de
+   l'actualització setmanal de dades**, perquè les xifres publicades es mantinguin al dia.
 
 ## Conseqüències
 

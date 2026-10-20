@@ -7,18 +7,6 @@ Anàlisi independent dels viatges a l'estranger dels alts càrrecs i del persona
 > publicat al portal de Dades Obertes de Catalunya, i es mostren amb finalitat informativa.
 > Un viatge estadísticament atípic no implica cap irregularitat.
 
-## Estat
-
-🚧 **Fase 4 — Web pública.** Les dades s'actualitzen soles cada dilluns i es copien a Turso.
-
-| Fase | Descripció | Estat |
-|------|------------|-------|
-| 0 | Ingesta en cru via API SODA i inventari de qualitat | ✅ |
-| 1 | Preparació: dades tal com venen + marques, exclusió p99 de durada | ✅ |
-| 2 | Detecció de canvis entre instantànies i base de dades SQLite | ✅ |
-| 3 | Automatització setmanal (GitHub Actions) i còpia a Turso | ✅ |
-| 4 | Web pública | ⏳ |
-| 5 | Model de cost esperat i viatges atípics | ⏳ |
 
 ## Criteris de l'anàlisi
 
@@ -99,9 +87,14 @@ Mentre es treballa, el web es revisa en local:
 uv run viatges web && uv run python -m http.server 8000 --directory site
 ```
 
-Per publicar-lo, s'executa **a mà** el workflow [`web.yml`](.github/workflows/web.yml)
-(*Actions → Web → Run workflow*). Cap push ni l'actualització setmanal no el despleguen sols:
-les dades noves de cada dilluns arriben al web la propera vegada que s'executa. Configuració
+El workflow [`web.yml`](.github/workflows/web.yml) publica la web:
+
+- **sol, cada dilluns**, després de l'actualització setmanal de dades, de manera que les xifres
+  publicades es mantenen al dia sense intervenció;
+- **a mà** (*Actions → Web → Run workflow*), per publicar canvis de disseny o de textos.
+
+Els push no despleguen res. Cal tenir en compte, però, que el desplegament del dilluns publica
+el codi que hi hagi a `main` en aquell moment. Configuració
 de Vercel (un sol cop):
 
 1. A Vercel, crea un projecte nou amb el framework «Other». No hi connectis el repositori

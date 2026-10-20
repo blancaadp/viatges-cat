@@ -1,6 +1,8 @@
-# Genera el web (ADR 0006) i el desplega a Vercel. Només s'executa a mà
-# (Actions → Web → Run workflow): ni els push ni l'actualització setmanal de dades no el
-# disparen, perquè el desplegament el decideix la persona que manté el web.
+# Genera la web (ADR 0006) i la desplega a Vercel. S'executa:
+#   - sol, després de cada actualització setmanal de dades que acabi bé, perquè les xifres
+#     publicades es mantinguin al dia;
+#   - a mà (Actions → Web → Run workflow), per publicar canvis de disseny o de textos.
+# Els push NO la despleguen: els canvis es revisen en local i es publiquen quan es decideix.
 #
 # El desplegament només s'executa si la variable del repositori PUBLICAR_WEB val "true"
 # (Settings → Secrets and variables → Actions → Variables) i hi ha els secrets VERCEL_TOKEN,
@@ -9,6 +11,9 @@
 name: Web
 
 on:
+  workflow_run:
+    workflows: ["Actualització setmanal"]
+    types: [completed]
   workflow_dispatch: {}
 
 concurrency:
@@ -20,6 +25,8 @@ permissions:
 
 jobs:
   construir:
+    # Després d'una actualització setmanal fallida no es publica res
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
