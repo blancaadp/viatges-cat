@@ -220,13 +220,13 @@ def test_pagina_de_destinacions_te_el_mapa(site):
     assert 'data-mesura="despesa"' in page and 'data-regio="europa"' in page
 
 
-def test_l_inici_es_el_nom_de_la_web_i_s_avisa_que_es_independent(site):
+def test_capcalera_amb_inici_i_avis_de_projecte_no_vinculat(site):
     home = (site / "index.html").read_text(encoding="utf-8")
     header = home[home.index('<header class="site-header">') : home.index("</header>")]
-    assert 'class="brand" href="/viatges-cat/" aria-current="page"' in header
-    assert "Web independent · no oficial" in header
-    nav = header[header.index('<nav aria-label="Principal">') :]
-    assert ">Inici<" not in nav  # l'inici no es repeteix al menú de dalt
-    assert "Sense vinculació amb la Generalitat de Catalunya" in home
-    footer = home[home.index('<footer class="site-footer">') :]
-    assert ">Inici</a>" in footer  # al peu, sí
+    assert "Projecte no vinculat a cap administració pública" in header
+    assert ">Inici</a>" in header and 'aria-current="page">Inici</a>' in header
+    assert (
+        "Projecte no vinculat amb la Generalitat de Catalunya ni amb cap altra administració"
+        in home
+    )
+    assert "Projecte independent" not in home
