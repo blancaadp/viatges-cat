@@ -1,9 +1,9 @@
 # Fase 1 · Preparació de les dades
 
-_Instantània descarregada el 2026-10-19T11:35:03.923689+00:00. Les dades s'analitzen tal com venen: vegeu l'[ADR 0004](../docs/decisions/0004-dades-tal-com-venen.md)._
+_Instantània descarregada el 2026-10-26T11:52:41.539024+00:00. Les dades s'analitzen tal com venen: vegeu l'[ADR 0004](../docs/decisions/0004-dades-tal-com-venen.md)._
 
-- Viatges: **1529** · trams de destinació: **1753**
-- Exclosos de l'anàlisi (durada > p99 = 11 dies): **13**, que sumen 46,582 € de 4,861,124 €
+- Viatges: **1535** · trams de destinació: **1759**
+- Exclosos de l'anàlisi (durada > p99 = 11 dies): **13**, que sumen 46,582 € de 4,890,325 €
 - Registres amb anotacions manuals: 20
 - Ciutats diferents després de normalitzar: 330 (abans 410)
 - Països diferents: 83
