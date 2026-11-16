@@ -1,11 +1,11 @@
 # Fase 1 · Preparació de les dades
 
-_Instantània descarregada el 2026-11-09T14:42:16.286528+00:00. Les dades s'analitzen tal com venen: vegeu l'[ADR 0004](../docs/decisions/0004-dades-tal-com-venen.md)._
+_Instantània descarregada el 2026-11-16T14:18:37.633541+00:00. Les dades s'analitzen tal com venen: vegeu l'[ADR 0004](../docs/decisions/0004-dades-tal-com-venen.md)._
 
-- Viatges: **1543** · trams de destinació: **1768**
-- Exclosos de l'anàlisi (durada > p99 = 11 dies): **13**, que sumen 46,582 € de 4,920,804 €
+- Viatges: **1552** · trams de destinació: **1782**
+- Exclosos de l'anàlisi (durada > p99 = 11 dies): **13**, que sumen 46,582 € de 5,024,203 €
 - Registres amb anotacions manuals: 20
-- Ciutats diferents després de normalitzar: 332 (abans 412)
+- Ciutats diferents després de normalitzar: 335 (abans 415)
 - Països diferents: 83
 - Departaments sense àmbit assignat: 0
 
@@ -36,7 +36,7 @@ _Instantània descarregada el 2026-11-09T14:42:16.286528+00:00. Les dades s'anal
 | flag_import_incomplet      |           3 |
 | flag_duplicat              |          16 |
 | flag_possible_desdoblament |           4 |
-| flag_desti_sense_pais      |           0 |
+| flag_desti_sense_pais      |           1 |
 | flag_no_estranger          |           5 |
 | flag_tram_repetit          |           4 |
 
@@ -44,7 +44,7 @@ _Instantània descarregada el 2026-11-09T14:42:16.286528+00:00. Les dades s'anal
 
 | motiu_import_zero   |   count |
 |:--------------------|--------:|
-| sense_despesa       |      52 |
+| sense_despesa       |      57 |
 | imputat_a_altre     |      22 |
 | pagat_per_tercers   |      18 |
 | pendent             |      10 |
@@ -83,11 +83,17 @@ _Instantània descarregada el 2026-11-09T14:42:16.286528+00:00. Les dades s'anal
 
 ### Països sense mapejar (`paisos.csv`)
 
-_Cap._
+| pais_raw   |   count |
+|:-----------|--------:|
+| Singapur   |       3 |
 
 ### Trams sense país
 
-_Cap._
+| tram                        |   count |
+|:----------------------------|--------:|
+| Hanoi (Singapur)            |       1 |
+| Da Nang (Singapur)          |       1 |
+| Ho Chi Minh City (Singapur) |       1 |
 
 ### Ciutats que encara semblen variants (`ciutats.csv`, heurística)
 
